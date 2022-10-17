@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Init_car_index.h>
 void setup() {
-// write your initialization code here
+    Init_Peripherals();
 }
 
 void loop() {
