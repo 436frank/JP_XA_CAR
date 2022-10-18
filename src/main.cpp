@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Init_car_index.h>
-#include <Moton.h>
+#include "Moton.h"
+#include "menu.h"
 void setup()
 {
     AdcBooster();
@@ -17,12 +18,20 @@ void loop()
 //    SerialUSB.print("\t");
 //    }
 //    SerialUSB.println();
+    readAllIR_values();
+    IR_calibrations();
+    //check_point();
+    check_point2();
+    // calculate weighted average 計算權重平均
+    Lp = LINE_estimation(IR_caliValues);
+    SerialUSB.println(Lp);
 
 }
 // TC3 Interrupt Service Routine
 void TC3_Handler()
 {
     checkButton();
+//    StateMachine(sButton);
     READ_QEI();
     QEI_filter();
     // clear the interrupt flag

@@ -64,6 +64,7 @@ volatile float count_L=0, count_R=0, Pcount_L=0, Pcount_R=0;  // initialize vari
 volatile float  Vcount_L=0, Vcount_R=0;
 float pos_now=0; //現在的pos位置
 float pos_old=0; //現在的pos位置
+
 float velocity = 0;
 /** Button variable **/
 boolean button, buttonPressed;
@@ -75,6 +76,8 @@ unsigned int bPressCount = 0, bReleaseCount=0;
 void readAllIR_values();
 void IR_calibrations();
 void IR_Max_Min();
+int LINE_estimation(int IRvalues[]);
+
 
 void Encoder_LA();
 void Encoder_LB();
@@ -170,6 +173,19 @@ void IR_Max_Min() {
         if (IR_vMin[index] > IRsensors[index])
             IR_vMin[index] = IRsensors[index];
     }
+}
+int LINE_estimation(int IRvalues[]) {
+    float temp_n = 0, temp_d = 0;
+    unsigned char ind;
+    int LPos;
+    for (ind = 1; ind < 6; ind++) {
+        temp_n += (float) IRvalues[ind] * (6.0 - ind);
+        temp_d += (float) IRvalues[ind];
+    }
+    LPos = (int) (temp_n / temp_d * 100.0);
+    if (LPos > 460) LPos = 460;
+    else if (LPos < 40) LPos = 40;
+    return (LPos);
 }
 /** Button() **/
 void checkButton() {
