@@ -18,7 +18,6 @@ void loop()
 //    }
 //    SerialUSB.println();
 
-    SerialUSB.println(Vcount_R);
 }
 // TC3 Interrupt Service Routine
 void TC3_Handler()
