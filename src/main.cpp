@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Init_car_index.h>
+#include <Moton.h>
 void setup()
 {
     AdcBooster();
@@ -11,7 +12,7 @@ void setup()
 
 void loop()
 {
-
+    Motor_control(1000,1000);
 //    for (int i = 0; i < 7; ++i) {
 //    SerialUSB.print(IRsensors[i]);
 //    SerialUSB.print("\t");
