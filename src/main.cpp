@@ -18,12 +18,7 @@ void loop()
 //    SerialUSB.print("\t");
 //    }
 //    SerialUSB.println();
-    readAllIR_values();
-    IR_calibrations();
-    //check_point();
-    check_point2();
-    // calculate weighted average 計算權重平均
-    Lp = LINE_estimation(IR_caliValues);
+    analogWrite(Buzzer_PIN,2048);
     SerialUSB.println(Lp);
 
 }
@@ -31,7 +26,7 @@ void loop()
 void TC3_Handler()
 {
     checkButton();
-//    StateMachine(sButton);
+    StateMachine(sButton);
     READ_QEI();
     QEI_filter();
     // clear the interrupt flag

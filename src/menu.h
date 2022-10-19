@@ -10,7 +10,8 @@
 #include <Arduino.h>
 void StateMachine(unsigned char value) {
     unsigned char index;
-    switch (value) {
+    switch (value)
+    {
         case 0:
             digitalWrite(LED_L_PIN, OFF);
             digitalWrite(LED_R_PIN, OFF);
@@ -29,7 +30,7 @@ void StateMachine(unsigned char value) {
             readAllIR_values();
             IR_Max_Min();
             // calculate weighted average 計算權重平均
-            //      Lp = LINE_estimation(IRsensors);
+                  Lp = LINE_estimation(IRsensors);
             break;
         case 2:
 //            digitalWrite(LED_R, OFF);
