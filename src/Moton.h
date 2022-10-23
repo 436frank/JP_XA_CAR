@@ -19,13 +19,13 @@ const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
 const float p2r = ((wheel_diameter * PI) / (encoder_resolution * 85));//解析度放大85倍
 const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/0.5ms)
-#define PWMLimit  4000
+#define PWMLimit  2000
 #define center  300
 
 char vc_f=1;
 //float vc_kp = 550, vc_ki = 11, vc_kd = 0;
 float vc_kp = 500, vc_ki = 11, vc_kd = 0;
-float vc_command =1*mm2p; //2*mm2p  // MAX  OR  等速1.8m/s
+float vc_command =0.8*mm2p; //2*mm2p  // MAX  OR  等速1.8m/s
 //int Kp=40, Kd=500, basePWM =600 ;
 int Kp=40, Kd=300, basePWM =600 ;
 float deltaPWM_ = 0;
@@ -76,9 +76,13 @@ void Motor_control(int speed_L, int speed_R) {
 }
 void MotorRest() {
     // Left motor
-    analogWrite(MOTOR_PWM_L, 0);
+//    analogWrite(MOTOR_PWM_L, 0);
+    REG_TCC0_CC3 = 0;                               // TCC0 CC0 - on D3
+    while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
     // Right motor
-    analogWrite(MOTOR_PWM_R, 0);
+//    analogWrite(MOTOR_PWM_R, 0);
+    REG_TCC0_CC2 = 0;                               // TCC0 CC3 - on D2
+    while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 }
 void vc_Command(char vc) {
     switch (vc) {
