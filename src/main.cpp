@@ -18,10 +18,10 @@ void loop()
 //    SerialUSB.print("\t");
 //    }
 //    SerialUSB.println();
-//
     REG_TCC0_CC2 = 1000;                               // TCC0 CC3 - on D2
-    while (TCC0->SYNCBUSY.bit.CC2);
-
+    while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
+    REG_TCC0_CC3 = 4000;                               // TCC0 CC3 - on D2
+    while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
     SerialUSB.println(Lp);
 
 }

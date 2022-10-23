@@ -341,8 +341,9 @@ void setupPWM() {
     
     // Connect the TCC0 timer to digital output D2,D3 - port pins are paired odd PMUO and even PMUXE
     // F specify the timers: TCC0
-    PORT->Group[g_APinDescription[MOTOR_PWM_R].ulPort].PMUX[g_APinDescription[MOTOR_PWM_R].ulPin >> 1].reg = PORT_PMUX_PMUXO_F;
-    PORT->Group[g_APinDescription[MOTOR_PWM_L].ulPort].PMUX[g_APinDescription[MOTOR_PWM_L].ulPin >> 1].reg = PORT_PMUX_PMUXE_F;
+    PORT->Group[g_APinDescription[MOTOR_PWM_R].ulPort].PMUX[g_APinDescription[MOTOR_PWM_R].ulPin >> 1].reg = PORT_PMUX_PMUXO_F;//PA10 D2
+    PORT->Group[g_APinDescription[MOTOR_PWM_L].ulPort].PMUX[g_APinDescription[MOTOR_PWM_L].ulPin >> 1].reg |= PORT_PMUX_PMUXE_F;//PA11 D3
+
 
     REG_TCC0_WAVE |= TCC_WAVE_WAVEGEN_NPWM;         // Setup Single slope PWM on TCC0
     while (TCC0->SYNCBUSY.bit.WAVE);                // Wait for synchronization
@@ -354,9 +355,9 @@ void setupPWM() {
 
     // Set the PWM signal to output 0% duty cycle
     REG_TCC0_CC2 = 0;                               // TCC0 CC3 - on D2
-    while (TCC0->SYNCBUSY.bit.CC0);                 // Wait for synchronization
+    while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
     REG_TCC0_CC3 = 0;                               // TCC0 CC0 - on D3
-    while (TCC0->SYNCBUSY.bit.CC1);                 // Wait for synchronization
+    while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
     // Divide the 48MHz signal by 1 giving 48MHz (20.83ns) TCC0 timer tick and enable the outputs
     REG_TCC0_CTRLA |= TCC_CTRLA_PRESCALER_DIV1 |    // Divide GCLK4 by 1
                       TCC_CTRLA_ENABLE;             // Enable the TCC0 output

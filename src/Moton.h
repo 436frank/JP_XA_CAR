@@ -25,9 +25,9 @@ const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/0.5ms)
 char vc_f=1;
 //float vc_kp = 550, vc_ki = 11, vc_kd = 0;
 float vc_kp = 500, vc_ki = 11, vc_kd = 0;
-float vc_command =0.8*mm2p; //2*mm2p  // MAX  OR  等速1.8m/s
+float vc_command =1*mm2p; //2*mm2p  // MAX  OR  等速1.8m/s
 //int Kp=40, Kd=500, basePWM =600 ;
-int Kp=10, Kd=50, basePWM =600 ;
+int Kp=40, Kd=300, basePWM =600 ;
 float deltaPWM_ = 0;
 int error_new, error_old;
 float vc_error_new, vc_error_old, vc_integral = 0;
@@ -46,11 +46,15 @@ void Motor_control(int speed_L, int speed_R) {
         if (speed_L > PWMLimit) speed_L = PWMLimit;
         // Left motor
         digitalWrite(MOTOR_DIR_L, LOW);
-        analogWrite(MOTOR_PWM_L, speed_L);
+        REG_TCC0_CC3 = speed_L;                               // TCC0 CC0 - on D3
+        while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
+//        analogWrite(MOTOR_PWM_L, speed_L);
     } else {
         if (speed_L < -PWMLimit) speed_L = -PWMLimit;
         digitalWrite(MOTOR_DIR_L, HIGH);
-        analogWrite(MOTOR_PWM_L, -speed_L);
+        REG_TCC0_CC3 = -speed_L;                               // TCC0 CC0 - on D3
+        while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
+//        analogWrite(MOTOR_PWM_L, -speed_L);
     }
 
     // Right motor
@@ -58,12 +62,16 @@ void Motor_control(int speed_L, int speed_R) {
         if (speed_R > PWMLimit) speed_R = PWMLimit;
         // Left motor
         digitalWrite(MOTOR_DIR_R, LOW);
-        analogWrite(MOTOR_PWM_R, speed_R);
+        REG_TCC0_CC2 = speed_R;                               // TCC0 CC3 - on D2
+        while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
+//        analogWrite(MOTOR_PWM_R, speed_R);
     } else {
         if (speed_R < -PWMLimit) speed_R = -PWMLimit;
         // Left motor
         digitalWrite(MOTOR_DIR_R, HIGH);
-        analogWrite(MOTOR_PWM_R, -speed_R);
+        REG_TCC0_CC2 = -speed_R;                               // TCC0 CC3 - on D2
+        while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
+//        analogWrite(MOTOR_PWM_R, -speed_R);
     }
 }
 void MotorRest() {

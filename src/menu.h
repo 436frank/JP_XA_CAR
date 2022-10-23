@@ -24,9 +24,9 @@ void StateMachine(unsigned char value) {
         case 1:
             digitalWrite(LED_L_PIN, ON);
             digitalWrite(LED_R_PIN, ON);
-            if (cCount == 500) Motor_control(800, 800);   // not balanced in left and right wheels
-            else if (cCount == 750) Motor_control(0, 0);
-            if (cCount == 1300) MotorRest();
+            if (cCount == 600) Motor_control(800, 800);   // not balanced in left and right wheels
+            else if (cCount == 800) Motor_control(0, 0);
+            if (cCount == 1400) MotorRest();
             readAllIR_values();
             IR_Max_Min();
             // calculate weighted average 計算權重平均
