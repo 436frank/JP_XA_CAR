@@ -44,31 +44,31 @@ void setup()
 void loop()
 {
     /**SPI MPU6500 test**/
-//    xyzFloat gValue = myMPU6500.getGValues();
-//    xyzFloat gyr = myMPU6500.getGyrValues();
-//    float temp = myMPU6500.getTemperature();
-//    float resultantG = myMPU6500.getResultantG(gValue);
-//    SerialUSB.print(gValue.x);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(gValue.y);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(gValue.z);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(resultantG);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(gyr.x);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(gyr.y);
-//    SerialUSB.print("\t");
-//    SerialUSB.println(gyr.z);
-//    delay(10);
-    /**                **/
-    for (int i = 0; i < 7; ++i) {
-    SerialUSB.print(IRsensors[i]);
+    xyzFloat gValue = myMPU6500.getGValues();
+    xyzFloat gyr = myMPU6500.getGyrValues();
+    float temp = myMPU6500.getTemperature();
+    float resultantG = myMPU6500.getResultantG(gValue);
+    SerialUSB.print(gValue.x);
     SerialUSB.print("\t");
-    }
-    SerialUSB.println();
+    SerialUSB.print(gValue.y);
+    SerialUSB.print("\t");
+    SerialUSB.print(gValue.z);
+    SerialUSB.print("\t");
+    SerialUSB.print(resultantG);
+    SerialUSB.print("\t");
+    SerialUSB.print(gyr.x);
+    SerialUSB.print("\t");
+    SerialUSB.print(gyr.y);
+    SerialUSB.print("\t");
+    SerialUSB.println(gyr.z);
     delay(10);
+    /**                **/
+//    for (int i = 0; i < 7; ++i) {
+//    SerialUSB.print(IRsensors[i]);
+//    SerialUSB.print("\t");
+//    }
+//    SerialUSB.println();
+//    delay(10);
 //    REG_TCC0_CC2 = 4000;                               // TCC0 CC3 - on D2
 //    while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 //    REG_TCC0_CC3 = 4000;                               // TCC0 CC3 - on D2
