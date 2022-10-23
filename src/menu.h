@@ -22,23 +22,23 @@ void StateMachine(unsigned char value) {
             }
             break;
         case 1:
-            digitalWrite(LED_L_PIN, OFF);
-            digitalWrite(LED_R_PIN, OFF);
-            if (cCount == 750) Motor_control(800, 800);   // not balanced in left and right wheels
-            else if (cCount == 1300) Motor_control(0, 0);
-            if (cCount == 1500) MotorRest();
+            digitalWrite(LED_L_PIN, ON);
+            digitalWrite(LED_R_PIN, ON);
+            if (cCount == 500) Motor_control(800, 800);   // not balanced in left and right wheels
+            else if (cCount == 750) Motor_control(0, 0);
+            if (cCount == 1300) MotorRest();
             readAllIR_values();
             IR_Max_Min();
             // calculate weighted average 計算權重平均
                   Lp = LINE_estimation(IRsensors);
             break;
         case 2:
-//            digitalWrite(LED_R, OFF);
-//            digitalWrite(LED_L, ON);
+            digitalWrite(LED_L_PIN, ON);
+            digitalWrite(LED_R_PIN, OFF);
             if(start_cont<1000) start_cont++;
             if(start_cont==1000)
             {
-                test_1m_flag=1;
+                //test_1m_flag=1;
                 readAllIR_values();
                 IR_calibrations();
                 //check_point();
@@ -66,6 +66,7 @@ void StateMachine(unsigned char value) {
 //                }
 
                 LINE_following_VC();
+//                  LINE_following() ;
                 if(test_1m_flag==1)
                 {
                     test_1m[test_1m_cont]=velocity;
@@ -78,6 +79,8 @@ void StateMachine(unsigned char value) {
             }
             break;
         case 3:
+            digitalWrite(LED_L_PIN, OFF);
+            digitalWrite(LED_R_PIN, ON);
             if(pos_now<pos_stop)
             {
                 readAllIR_values();

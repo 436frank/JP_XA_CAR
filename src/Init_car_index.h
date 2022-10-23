@@ -178,10 +178,13 @@ int LINE_estimation(int IRvalues[]) {
     float temp_n = 0, temp_d = 0;
     unsigned char ind;
     int LPos;
-    for (ind = 1; ind < 6; ind++) {
-        temp_n += (float) IRvalues[ind] * (6.0 - ind);
-        temp_d += (float) IRvalues[ind];
-    }
+//    for (ind = 1; ind < 6; ind++) {
+//        temp_n += (float) IRvalues[ind] * (6.0 - ind);
+//        temp_d += (float) IRvalues[ind];
+//    }
+//    LPos = (int) (temp_n / temp_d * 100.0);
+    temp_n=(float) 1*IRvalues[1]+2*IRvalues[2]+3*IRvalues[3]+4*IRvalues[4]+5*IRvalues[5];
+    temp_d=(float) IRvalues[1]+IRvalues[2]+IRvalues[3]+IRvalues[4]+IRvalues[5];
     LPos = (int) (temp_n / temp_d * 100.0);
     if (LPos > 460) LPos = 460;
     else if (LPos < 40) LPos = 40;
@@ -335,7 +338,7 @@ void setupPWM() {
     // Enable the port multiplexer for the digital pin D2,D3
     PORT->Group[g_APinDescription[MOTOR_PWM_R].ulPort].PINCFG[g_APinDescription[MOTOR_PWM_R].ulPin].bit.PMUXEN = 1;
     PORT->Group[g_APinDescription[MOTOR_PWM_L].ulPort].PINCFG[g_APinDescription[MOTOR_PWM_L].ulPin].bit.PMUXEN = 1;
-
+    
     // Connect the TCC0 timer to digital output D2,D3 - port pins are paired odd PMUO and even PMUXE
     // F specify the timers: TCC0
     PORT->Group[g_APinDescription[MOTOR_PWM_R].ulPort].PMUX[g_APinDescription[MOTOR_PWM_R].ulPin >> 1].reg = PORT_PMUX_PMUXO_F;
@@ -350,10 +353,10 @@ void setupPWM() {
     while (TCC0->SYNCBUSY.bit.PER);                 // Wait for synchronization
 
     // Set the PWM signal to output 0% duty cycle
-    REG_TCC0_CC3 = 0;                               // TCC0 CC3 - on D2
-    while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
-    REG_TCC0_CC0 = 0;                               // TCC0 CC0 - on D3
+    REG_TCC0_CC2 = 0;                               // TCC0 CC3 - on D2
     while (TCC0->SYNCBUSY.bit.CC0);                 // Wait for synchronization
+    REG_TCC0_CC3 = 0;                               // TCC0 CC0 - on D3
+    while (TCC0->SYNCBUSY.bit.CC1);                 // Wait for synchronization
     // Divide the 48MHz signal by 1 giving 48MHz (20.83ns) TCC0 timer tick and enable the outputs
     REG_TCC0_CTRLA |= TCC_CTRLA_PRESCALER_DIV1 |    // Divide GCLK4 by 1
                       TCC_CTRLA_ENABLE;             // Enable the TCC0 output

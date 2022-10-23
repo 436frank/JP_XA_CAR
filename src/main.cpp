@@ -18,7 +18,10 @@ void loop()
 //    SerialUSB.print("\t");
 //    }
 //    SerialUSB.println();
-    analogWrite(Buzzer_PIN,2048);
+//
+    REG_TCC0_CC2 = 1000;                               // TCC0 CC3 - on D2
+    while (TCC0->SYNCBUSY.bit.CC2);
+
     SerialUSB.println(Lp);
 
 }
