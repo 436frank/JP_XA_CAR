@@ -310,7 +310,7 @@ void setupTimers()
 
     // timer TC3 counts up to CC0 value to generate 1ms interrupt,
     // this determines the frequency of the interrupt operation: Freq = 48Mhz/(N*CC0*Prescaler)
-    REG_TC3_COUNT16_CC0 =500;                    // Set the CC0 (period) register to 1000 for 1MHz clock  1kHZ  1ms
+    REG_TC3_COUNT16_CC0 =1000;                    // Set the CC0 (period) register to 1000 for 1MHz clock  1kHZ  1ms
     while (TC3->COUNT16.STATUS.bit.SYNCBUSY);     // Wait for synchronization
 
     NVIC_SetPriority(TC3_IRQn, 1);                // Set the Nested Vector Interrupt Controller (NVIC) priority for TC3 to 3 (0 highest)

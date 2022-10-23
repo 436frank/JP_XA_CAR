@@ -69,11 +69,11 @@ void StateMachine(unsigned char value) {
 //                  LINE_following() ;
                 if(test_1m_flag==1)
                 {
-                    test_1m[test_1m_cont]=velocity;
-                    test_1_pwm[test_1m_cont]=deltaPWM_;
-                    test_1_cmd[test_1m_cont]=vc_command;
-                    speed_integral+=velocity;
-                    test_1m_cont++;
+//                    test_1m[test_1m_cont]=velocity;
+//                    test_1_pwm[test_1m_cont]=deltaPWM_;
+//                    test_1_cmd[test_1m_cont]=vc_command;
+//                    speed_integral+=velocity;
+//                    test_1m_cont++;
                 }
 
             }

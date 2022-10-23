@@ -14,6 +14,7 @@ project("JP_XA_CAR" C CXX)
 
 include(CMakeListsPrivate.txt)
 
+include_directories("./.pio/libdeps/mkrzero/MPU9250_WE/src")
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsUser.txt)
 include(CMakeListsUser.txt)
 endif()
