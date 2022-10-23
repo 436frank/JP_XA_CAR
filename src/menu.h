@@ -33,6 +33,7 @@ void StateMachine(unsigned char value) {
                   Lp = LINE_estimation(IRsensors);
             break;
         case 2:
+            NVIC_DisableIRQ(TC3_IRQn);
             digitalWrite(LED_L_PIN, ON);
             digitalWrite(LED_R_PIN, OFF);
             if(start_cont<1000) start_cont++;

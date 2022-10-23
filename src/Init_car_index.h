@@ -48,6 +48,7 @@ unsigned char IRindex[7] = {A1, A2, A0, A3, A4, A5, A6};
 int IRsensors[7]={0}, IR_caliValues[7];
 int IR_vMax[7]={0, 0, 0, 0, 0, 0,0}, IR_vMin[7]={900, 900, 900, 900, 900, 900,900};
 int16_t start_cont=0;
+int OLD_LPos=0;
 // Weighted average
 int Lp;
 /** Encoder variable **/
@@ -183,11 +184,19 @@ int LINE_estimation(int IRvalues[]) {
 //        temp_d += (float) IRvalues[ind];
 //    }
 //    LPos = (int) (temp_n / temp_d * 100.0);
-    temp_n=(float) 1*IRvalues[1]+2*IRvalues[2]+3*IRvalues[3]+4*IRvalues[4]+5*IRvalues[5];
-    temp_d=(float) IRvalues[1]+IRvalues[2]+IRvalues[3]+IRvalues[4]+IRvalues[5];
-    LPos = (int) (temp_n / temp_d * 100.0);
+    if(IRvalues[3]>1159 || IRvalues[2]>1159 || IRvalues[4]>1159 || IRvalues[5]>1159 || IRvalues[1]>1159)
+    {
+        temp_n=(float) 1*IRvalues[1]+2*IRvalues[2]+3*IRvalues[3]+4*IRvalues[4]+5*IRvalues[5];
+        temp_d=(float) IRvalues[1]+IRvalues[2]+IRvalues[3]+IRvalues[4]+IRvalues[5];
+        LPos = (int) (temp_n / temp_d * 100.0);
+    }
+    else
+    {
+        LPos=OLD_LPos;
+    }
     if (LPos > 460) LPos = 460;
     else if (LPos < 40) LPos = 40;
+    OLD_LPos=LPos;
     return (LPos);
 }
 /** Button() **/
@@ -310,7 +319,7 @@ void setupTimers()
 
     // timer TC3 counts up to CC0 value to generate 1ms interrupt,
     // this determines the frequency of the interrupt operation: Freq = 48Mhz/(N*CC0*Prescaler)
-    REG_TC3_COUNT16_CC0 =1000;                    // Set the CC0 (period) register to 1000 for 1MHz clock  1kHZ  1ms
+    REG_TC3_COUNT16_CC0 =500;                    // Set the CC0 (period) register to 1000 for 1MHz clock  1kHZ  1ms
     while (TC3->COUNT16.STATUS.bit.SYNCBUSY);     // Wait for synchronization
 
     NVIC_SetPriority(TC3_IRQn, 1);                // Set the Nested Vector Interrupt Controller (NVIC) priority for TC3 to 3 (0 highest)
