@@ -48,7 +48,7 @@ void setup()
 void loop()
 {
     /** MENU **/
-    StateMachine(sButton);
+    StateMachine_to_loop(sButton);
     /**SPI MPU6500 test**/
 //    xyzFloat gValue = myMPU6500.getGValues();
 //    xyzFloat gyr = myMPU6500.getGyrValues();
@@ -97,8 +97,15 @@ void loop()
 // TC3 Interrupt Service Routine
 void TC3_Handler()
 {
+    if ( start_flag==1)
+    {
+        if(start_cont<2500) start_cont++;
+    }
+    if ( readAllIR_flag==1)
+    {
+        readAllIR_values();
+    }
     checkButton();
-
     READ_QEI();
     QEI_filter();
     // clear the interrupt flag

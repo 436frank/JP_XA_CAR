@@ -4,10 +4,14 @@
 
 #ifndef JP_XA_CAR_MENU_H
 #define JP_XA_CAR_MENU_H
-
 #endif //JP_XA_CAR_MENU_H
-int a=0;
 #include <Arduino.h>
+//#define old_menu
+#define new_menu
+int a=0;
+/**  old_menu  **/
+void StateMachine(unsigned char value);
+#ifdef old_check
 void StateMachine(unsigned char value) {
     unsigned char index;
     switch (value)
@@ -44,8 +48,7 @@ void StateMachine(unsigned char value) {
                 //test_1m_flag=1;
                 readAllIR_values();
                 IR_calibrations();
-                //check_point();
-                check_point2();
+                check_point();
                 // calculate weighted average 計算權重平均
                 Lp = LINE_estimation(IR_caliValues);
 //                /**  **/
@@ -93,8 +96,7 @@ void StateMachine(unsigned char value) {
             {
                 readAllIR_values();
                 IR_calibrations();
-                //check_point();
-                check_point2();
+                check_point();
                 // calculate weighted average 計算權重平均
                 Lp = LINE_estimation(IR_caliValues);
                 LINE_following_park_well();
@@ -106,8 +108,7 @@ void StateMachine(unsigned char value) {
                 {
                     readAllIR_values();
                     IR_calibrations();
-                    //check_point();
-                    check_point2();
+                    check_point();
                     // calculate weighted average 計算權重平均
                     Lp = LINE_estimation(IR_caliValues);
                     LINE_following_park_well();
@@ -141,8 +142,7 @@ void StateMachine(unsigned char value) {
             {
                 readAllIR_values();
                 IR_calibrations();
-                //check_point();
-                check_point2();
+                check_point();
                 // calculate weighted average 計算權重平均
                 Lp = LINE_estimation(IR_caliValues);
                 if(all_road_radius[prompt_cont]>300)
@@ -158,4 +158,91 @@ void StateMachine(unsigned char value) {
             break;
     }
 }
-//
+#endif
+/**  new_menu  **/
+void Selector();
+void count(unsigned char value);
+void StateMachine_to_loop(unsigned char value);
+#ifdef new_menu
+void Selector()
+{
+
+    if(eMotionR.pNEW<10)
+    {
+        if(old_select!=0)tone(Buzzer_PIN,1318,200);old_select=0;
+    }
+    else if(eMotionR.pNEW>=10 && eMotionR.pNEW<20)
+    {
+        if(old_select!=1)tone(Buzzer_PIN,1318,200);old_select=1;
+        digitalWrite(LED_1_PIN, ON);
+        digitalWrite(LED_2_PIN, OFF);
+        digitalWrite(LED_3_PIN, OFF);
+    }
+    else if(eMotionR.pNEW>=20 && eMotionR.pNEW<30)
+    {
+        if(old_select!=2)tone(Buzzer_PIN,1318,200);old_select=2;
+        digitalWrite(LED_1_PIN, OFF);
+        digitalWrite(LED_2_PIN, ON);
+        digitalWrite(LED_3_PIN, OFF);
+    }
+    else if(eMotionR.pNEW>=40)
+    {
+        if(old_select!=3)tone(Buzzer_PIN,1318,200);old_select=3;
+        digitalWrite(LED_1_PIN, OFF);
+        digitalWrite(LED_2_PIN, OFF);
+        digitalWrite(LED_3_PIN, ON);
+    }
+}
+void count_flag(unsigned char value)
+{
+}
+void StateMachine_to_loop(unsigned char value)
+{
+    unsigned char index;
+    switch (value)
+    {
+        case 0:
+            readAllIR_flag=0;
+            Selector();
+            SerialUSB.print(eMotionR.pNEW);
+            SerialUSB.print("\t");
+            SerialUSB.println(eMotionL.pNEW);
+
+            break;
+        case 1:
+
+            if(start_cont==2000)
+            {
+                Motor_control(800, 800);
+            }
+            if(start_cont==2500)
+            {
+                start_flag=0;
+                start_cont=0;
+                MotorRest();
+                sButton = 0;
+            }
+            readAllIR_values();
+            IR_Max_Min();
+            break;
+        case 2:
+            if(start_cont==1000)
+            {
+                //test_1m_flag=1;
+                readAllIR_values();
+                IR_calibrations();
+                check_point();
+                // calculate weighted average 計算權重平均
+                Lp = LINE_estimation(IR_caliValues);
+            }
+
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+    }
+}
+#endif

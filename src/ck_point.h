@@ -39,9 +39,9 @@ uint8_t vc_flag_=0;
 int icont=0;
 uint8_t pcontRL_en=0;
 
-void check_point2();
+void check_point();
 
-/* to check_point2 Parameters*/
+/* to check_point Parameters*/
 int park_well_cont=0;
 uint8_t point_cross_flag=0 ;        //preset = 0
 uint8_t point_STOP_or_Hint_flag=1 ; //preset = 1     控制 是否 開啟 讀 左右符號
@@ -59,10 +59,10 @@ uint8_t hint_point_buzz_state=0;
 
 float pos_judge_cross=0;//十字鎖住的範圍
 float pos_stop=0;//停車跑一段的範圍
-/* to check_point2 Parameters_END*/
+/* to check_point Parameters_END*/
 
 /* check_point*/
-void check_point2()
+void check_point()
 {
 
     if(IRsensors[1]>1500 && IRsensors[2]>1500 && IRsensors[3]>1500 && IRsensors[4]>1500 && IRsensors[5]>1500) //IR1~5 = HIGH  上鎖

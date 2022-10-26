@@ -47,11 +47,16 @@ unsigned int cCount=0;    // calibration count
 unsigned char IRindex[7] = {A1, A2, A0, A3, A4, A5, A6};
 int IRsensors[7]={0}, IR_caliValues[7];
 int IR_vMax[7]={0, 0, 0, 0, 0, 0,0}, IR_vMin[7]={900, 900, 900, 900, 900, 900,900};
+int Lp;// Weighted average
+int OLD_LPos=0;// old Weighted average
+bool readAllIR_flag=0;
+/** menu  variable **/
 int16_t start_cont=0;
-int OLD_LPos=0;
-// Weighted average
-int Lp;
+bool start_flag =0;
+
+
 /** Encoder variable **/
+
 struct Motion_status {
     float  pOLD;
     float  pNEW;
@@ -71,9 +76,11 @@ float velocity = 0;
 boolean button, buttonPressed;
 unsigned char sButton = 0;  // status of Button
 unsigned int bPressCount = 0, bReleaseCount=0;
-
-/**  **/
-
+/** buzz variable**/
+uint8_t buzz_flag=0;
+/**  selector variable **/
+uint8_t old_select=0;
+/**                    **/
 void readAllIR_values();
 void IR_calibrations();
 void IR_Max_Min();
@@ -86,6 +93,7 @@ void Encoder_RA();
 void Encoder_RB();
 
 void Init_Peripherals();
+void checkButton();
 void AdcBooster();
 void setupTimers();
 void setupPWM();
@@ -228,10 +236,11 @@ void checkButton() {
             if (bReleaseCount > countButton) {
                 buttonPressed = LOW;            // button released confirmed
                 bReleaseCount = 0;              // reset released count value
-                sButton++;                      // change Button status value
+//                sButton++;                      // change Button status value
+                start_flag=1;
                 tone(Buzzer_PIN,1318,200);
-                if (sButton == 1) cCount = 0;     // reset
-                if (sButton > 5) sButton = 0;       // the largest value of Button status is 3
+//                if (sButton == 1) cCount = 0;     // reset
+//                if (sButton > 5) sButton = 0;       // the largest value of Button status is 3
             }
         }
     }
