@@ -47,6 +47,8 @@ void setup()
 
 void loop()
 {
+    /** MENU **/
+    StateMachine(sButton);
     /**SPI MPU6500 test**/
 //    xyzFloat gValue = myMPU6500.getGValues();
 //    xyzFloat gyr = myMPU6500.getGyrValues();
@@ -67,33 +69,36 @@ void loop()
 //    SerialUSB.println(gyr.z);
 //    delay(10);
     /**        IR        **/
-
+//
 //        readAllIR_values();
 //        IR_calibrations();
 //        Lp = LINE_estimation(IRsensors);
 //        SerialUSB.println(Lp);
-////        SerialUSB.print("\t");
-////    for (int i = 1; i < 6; ++i) {
-////        SerialUSB.print(IRsensors[i]);
-////        SerialUSB.print("\t");
-////    }
-////    SerialUSB.println();
+//        SerialUSB.print("\t");
+//    for (int i = 1; i < 6; ++i) {
+//        SerialUSB.print(IRsensors[i]);
+//        SerialUSB.print(i==5?'\n':'\t');
+//    }
+//    for (int i = 1; i < 6; ++i) {
+//        SerialUSB.print(IR_vMin[i]);
+//        SerialUSB.print(i==5?'\n':'\t');
+//    }
 //    delay(5);
 
-//    delay(10);
+//    delay(1);
     /**  **/
-//    REG_TCC0_CC2 = 4000;                               // TCC0 CC3 - on D2
+//    REG_TCC0_CC2 = 1000;                               // TCC0 CC3 - on D2
 //    while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 //    REG_TCC0_CC3 = 4000;                               // TCC0 CC3 - on D2
 //    while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
-//    SerialUSB.println(Lp);
+//    SerialUSB.println(pos_now);
 
 }
 // TC3 Interrupt Service Routine
 void TC3_Handler()
 {
     checkButton();
-    StateMachine(sButton);
+
     READ_QEI();
     QEI_filter();
     // clear the interrupt flag

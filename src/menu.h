@@ -6,7 +6,7 @@
 #define JP_XA_CAR_MENU_H
 
 #endif //JP_XA_CAR_MENU_H
-
+int a=0;
 #include <Arduino.h>
 void StateMachine(unsigned char value) {
     unsigned char index;
@@ -31,14 +31,16 @@ void StateMachine(unsigned char value) {
             IR_Max_Min();
             // calculate weighted average 計算權重平均
                   Lp = LINE_estimation(IRsensors);
+                  pos_now=0;
             break;
         case 2:
-            NVIC_DisableIRQ(TC3_IRQn);
-            digitalWrite(LED_L_PIN, ON);
+//            NVIC_DisableIRQ(TC3_IRQn);
+            digitalWrite(LED_L_PIN, OFF);
             digitalWrite(LED_R_PIN, OFF);
             if(start_cont<1000) start_cont++;
             if(start_cont==1000)
             {
+
                 //test_1m_flag=1;
                 readAllIR_values();
                 IR_calibrations();
@@ -46,12 +48,15 @@ void StateMachine(unsigned char value) {
                 check_point2();
                 // calculate weighted average 計算權重平均
                 Lp = LINE_estimation(IR_caliValues);
-//                if(vc_command<0.5*mm2p &&vc_f==1)
+//                /**  **/
+//                a=vc_following();
+//                Motor_control(a,a);
+//                if(vc_f==1)
 //                {
 //                    vc_Command(1);
 //                    digitalWrite(LED_R_PIN, OFF);
 //                }
-//                else if(vc_command>=1*mm2p)
+//                if(vc_command>=1*mm2p)
 //                {
 //                    vc_f=0;
 //                }
@@ -62,20 +67,22 @@ void StateMachine(unsigned char value) {
 //                    if(velocity<=0.1f)
 //                    {
 //                        test_1m_flag=0;
-//                        sButton = 3;
+//                        sButton = 0;
+//                        MotorRest();
 //                    }
 //                }
-
+//                /**  **/
+//
                 LINE_following_VC();
-//                  LINE_following() ;
-                if(test_1m_flag==1)
-                {
-//                    test_1m[test_1m_cont]=velocity;
-//                    test_1_pwm[test_1m_cont]=deltaPWM_;
-//                    test_1_cmd[test_1m_cont]=vc_command;
-//                    speed_integral+=velocity;
-//                    test_1m_cont++;
-                }
+////                  LINE_following() ;
+//                if(test_1m_flag==1)
+//                {
+////                    test_1m[test_1m_cont]=velocity;
+////                    test_1_pwm[test_1m_cont]=deltaPWM_;
+////                    test_1_cmd[test_1m_cont]=vc_command;
+////                    speed_integral+=velocity;
+////                    test_1m_cont++;
+//                }
 
             }
             break;

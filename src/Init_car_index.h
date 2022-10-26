@@ -177,7 +177,7 @@ void IR_Max_Min() {
 }
 int LINE_estimation(int IRvalues[]) {
     float temp_n = 0, temp_d = 0;
-    unsigned char ind;
+//    unsigned char ind;
     int LPos;
 //    for (ind = 1; ind < 6; ind++) {
 //        temp_n += (float) IRvalues[ind] * (6.0 - ind);
@@ -347,7 +347,6 @@ void setupPWM() {
     // Enable the port multiplexer for the digital pin D2,D3
     PORT->Group[g_APinDescription[MOTOR_PWM_R].ulPort].PINCFG[g_APinDescription[MOTOR_PWM_R].ulPin].bit.PMUXEN = 1;
     PORT->Group[g_APinDescription[MOTOR_PWM_L].ulPort].PINCFG[g_APinDescription[MOTOR_PWM_L].ulPin].bit.PMUXEN = 1;
-    
     // Connect the TCC0 timer to digital output D2,D3 - port pins are paired odd PMUO and even PMUXE
     // F specify the timers: TCC0
     PORT->Group[g_APinDescription[MOTOR_PWM_R].ulPort].PMUX[g_APinDescription[MOTOR_PWM_R].ulPin >> 1].reg = PORT_PMUX_PMUXO_F;//PA10 D2
