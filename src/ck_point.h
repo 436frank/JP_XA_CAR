@@ -99,6 +99,8 @@ void check_point()
                 all_PROMPT[prompt_cont]=(Pcount_R+Pcount_L)/2;
                 prompt_cont++;
                 vc_flag_++;
+                readAllIR_flag=1;
+                LINE_following_VC_flag=1;
 
 
             }

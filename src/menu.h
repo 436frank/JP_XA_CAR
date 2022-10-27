@@ -166,31 +166,52 @@ void StateMachine_to_loop(unsigned char value);
 #ifdef new_menu
 void Selector()
 {
+    if(eMotionL.pNEW<20)
+    {
+        if (old_enter != 0)tone(Buzzer_PIN, 1318, 200);
+        old_enter = 0;
+        digitalWrite(LED_L_PIN, OFF);
+        digitalWrite(LED_R_PIN, OFF);
+        if (eMotionR.pNEW < 10)
+        {
+            if (old_select != 0)tone(Buzzer_PIN, 1318, 200);
+            old_select = 0;
+            digitalWrite(LED_1_PIN, OFF);
+            digitalWrite(LED_2_PIN, OFF);
+            digitalWrite(LED_3_PIN, OFF);
+        }
+        else if (eMotionR.pNEW >= 10 && eMotionR.pNEW < 20)
+        {
+            if (old_select != 1)tone(Buzzer_PIN, 1318, 200);
+            old_select = 1;
+            digitalWrite(LED_1_PIN, ON);
+            digitalWrite(LED_2_PIN, OFF);
+            digitalWrite(LED_3_PIN, OFF);
+        }
+        else if (eMotionR.pNEW >= 20 && eMotionR.pNEW < 30)
+        {
+            if (old_select != 2)tone(Buzzer_PIN, 1318, 200);
+            old_select = 2;
+            digitalWrite(LED_1_PIN, OFF);
+            digitalWrite(LED_2_PIN, ON);
+            digitalWrite(LED_3_PIN, OFF);
+        }
+        else if (eMotionR.pNEW >= 40)
+        {
+            if (old_select != 3)tone(Buzzer_PIN, 1318, 200);
+            old_select = 3;
+            digitalWrite(LED_1_PIN, OFF);
+            digitalWrite(LED_2_PIN, OFF);
+            digitalWrite(LED_3_PIN, ON);
+        }
+    }
+    else if(eMotionL.pNEW>=20)
+    {
+        if (old_enter != 1)tone(Buzzer_PIN, 1318, 200);
+        old_enter = 1;
+        digitalWrite(LED_L_PIN, ON);
+        digitalWrite(LED_R_PIN, OFF);
 
-    if(eMotionR.pNEW<10)
-    {
-        if(old_select!=0)tone(Buzzer_PIN,1318,200);old_select=0;
-    }
-    else if(eMotionR.pNEW>=10 && eMotionR.pNEW<20)
-    {
-        if(old_select!=1)tone(Buzzer_PIN,1318,200);old_select=1;
-        digitalWrite(LED_1_PIN, ON);
-        digitalWrite(LED_2_PIN, OFF);
-        digitalWrite(LED_3_PIN, OFF);
-    }
-    else if(eMotionR.pNEW>=20 && eMotionR.pNEW<30)
-    {
-        if(old_select!=2)tone(Buzzer_PIN,1318,200);old_select=2;
-        digitalWrite(LED_1_PIN, OFF);
-        digitalWrite(LED_2_PIN, ON);
-        digitalWrite(LED_3_PIN, OFF);
-    }
-    else if(eMotionR.pNEW>=40)
-    {
-        if(old_select!=3)tone(Buzzer_PIN,1318,200);old_select=3;
-        digitalWrite(LED_1_PIN, OFF);
-        digitalWrite(LED_2_PIN, OFF);
-        digitalWrite(LED_3_PIN, ON);
     }
 }
 void count_flag(unsigned char value)
@@ -226,14 +247,11 @@ void StateMachine_to_loop(unsigned char value)
             IR_Max_Min();
             break;
         case 2:
-            if(start_cont==1000)
+            if(start_cont>=1000)
             {
                 //test_1m_flag=1;
-                readAllIR_values();
-                IR_calibrations();
-                check_point();
-                // calculate weighted average 計算權重平均
-                Lp = LINE_estimation(IR_caliValues);
+                readAllIR_flag=1;
+                LINE_following_VC_flag=1;
             }
 
             break;

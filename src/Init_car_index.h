@@ -76,10 +76,12 @@ float velocity = 0;
 boolean button, buttonPressed;
 unsigned char sButton = 0;  // status of Button
 unsigned int bPressCount = 0, bReleaseCount=0;
-/** buzz variable**/
-uint8_t buzz_flag=0;
+/** LINE_following flag**/
+bool LINE_following_VC_flag=0;
 /**  selector variable **/
 uint8_t old_select=0;
+uint8_t old_enter=0;
+
 /**                    **/
 void readAllIR_values();
 void IR_calibrations();
@@ -237,6 +239,7 @@ void checkButton() {
                 buttonPressed = LOW;            // button released confirmed
                 bReleaseCount = 0;              // reset released count value
 //                sButton++;                      // change Button status value
+                sButton=old_select;
                 start_flag=1;
                 tone(Buzzer_PIN,1318,200);
 //                if (sButton == 1) cCount = 0;     // reset

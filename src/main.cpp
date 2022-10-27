@@ -99,11 +99,18 @@ void TC3_Handler()
 {
     if ( start_flag==1)
     {
-        if(start_cont<2500) start_cont++;
+        if(start_cont<5000) start_cont++;
     }
     if ( readAllIR_flag==1)
     {
         readAllIR_values();
+    }
+    if ( LINE_following_VC_flag==1)
+    {
+        IR_calibrations();
+        check_point();
+        Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
+        LINE_following_VC();
     }
     checkButton();
     READ_QEI();
