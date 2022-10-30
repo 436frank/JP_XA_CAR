@@ -73,7 +73,7 @@ void loop()
 //        readAllIR_values();
 //        IR_calibrations();
 //        Lp = LINE_estimation(IRsensors);
-//        SerialUSB.println(Lp);
+//        SerialUSB.print(Lp);
 //        SerialUSB.print("\t");
 //    for (int i = 1; i < 6; ++i) {
 //        SerialUSB.print(IRsensors[i]);
@@ -83,16 +83,21 @@ void loop()
 //        SerialUSB.print(IR_vMin[i]);
 //        SerialUSB.print(i==5?'\n':'\t');
 //    }
+//        SerialUSB.print(IRsensors[0]);
+//        SerialUSB.print("\t");
+//        SerialUSB.print(IRsensors[6]);
+//        SerialUSB.print("\n");
 //    delay(5);
 
 //    delay(1);
-    /**  **/
+    /** MOTOR **/
 //    REG_TCC0_CC2 = 1000;                               // TCC0 CC3 - on D2
 //    while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 //    REG_TCC0_CC3 = 4000;                               // TCC0 CC3 - on D2
 //    while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
 //    SerialUSB.println(pos_now);
-
+    /** check_point **/
+//    check_point();
 }
 // TC3 Interrupt Service Routine
 void TC3_Handler()

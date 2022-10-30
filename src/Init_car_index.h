@@ -239,6 +239,7 @@ void checkButton() {
                 buttonPressed = LOW;            // button released confirmed
                 bReleaseCount = 0;              // reset released count value
 //                sButton++;                      // change Button status value
+
                 sButton=old_select;
                 start_flag=1;
                 tone(Buzzer_PIN,1318,200);

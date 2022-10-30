@@ -26,7 +26,7 @@ const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/0.5ms)
 char vc_f=1;
 //float vc_kp = 550, vc_ki = 11, vc_kd = 0;
 float vc_kp = 550, vc_ki = 35, vc_kd = 0;
-float vc_command =0.8*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
+float vc_command =1*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
 int Kp=15, Kd=80, basePWM =600 ;
 //int Kp=40, Kd=300, basePWM =600 ;
 float deltaPWM_ = 0;

@@ -19,7 +19,7 @@
 /*record line DATA Parameters*/
 unsigned long NOW_Time;//ms
 unsigned long old_time;//ms
-
+//char check_point =0;
 int prompt_cont=0;
 float all_PROMPT[200];          //當前左右輪差pos    左-右
 float all_PROMPT_w[200];        //當前車中心位置pos  (左+右)/2
@@ -40,7 +40,7 @@ int icont=0;
 uint8_t pcontRL_en=0;
 
 void check_point();
-
+int Calculate_Acc_dec_distance();/** Calculate Acc dec distance Parameters **/
 /* to check_point Parameters*/
 int park_well_cont=0;
 uint8_t point_cross_flag=0 ;        //preset = 0
@@ -93,7 +93,7 @@ void check_point()
             stop_point_cont++;
             if(stop_point_cont==2) {
                 pos_stop=pos_now+stop_pos_range;
-                sButton = 3;
+                sButton = 0;
                 stop_point_cont = 0;
                 all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
                 all_PROMPT[prompt_cont]=(Pcount_R+Pcount_L)/2;
@@ -141,3 +141,9 @@ void check_point()
 
 }
 /* check_point_END*/
+int Calculate_Acc_dec_distance()
+{
+    int result=0;
+    result = velocity;
+    return result;
+}

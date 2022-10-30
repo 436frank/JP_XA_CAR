@@ -168,50 +168,65 @@ void Selector()
 {
     if(eMotionL.pNEW<20)
     {
-        if (old_enter != 0)tone(Buzzer_PIN, 1318, 200);
-        old_enter = 0;
-        digitalWrite(LED_L_PIN, OFF);
-        digitalWrite(LED_R_PIN, OFF);
+        if (old_enter != 0){
+            tone(Buzzer_PIN, 800, 200);
+            digitalWrite(LED_L_PIN, OFF);
+            digitalWrite(LED_R_PIN, OFF);
+            old_enter = 0;
+        }
         if (eMotionR.pNEW < 10)
         {
-            if (old_select != 0)tone(Buzzer_PIN, 1318, 200);
-            old_select = 0;
-            digitalWrite(LED_1_PIN, OFF);
-            digitalWrite(LED_2_PIN, OFF);
-            digitalWrite(LED_3_PIN, OFF);
+            if (old_select != 0)
+            {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 0;
+            }
+
         }
-        else if (eMotionR.pNEW >= 10 && eMotionR.pNEW < 20)
+        else if (eMotionR.pNEW >= 10 && eMotionR.pNEW < 20)//選擇2
         {
-            if (old_select != 1)tone(Buzzer_PIN, 1318, 200);
-            old_select = 1;
-            digitalWrite(LED_1_PIN, ON);
-            digitalWrite(LED_2_PIN, OFF);
-            digitalWrite(LED_3_PIN, OFF);
+            if (old_select != 1){
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, OFF);
+                tone(Buzzer_PIN, 1318, 200);
+                old_select = 1;
+            }
+
+
         }
-        else if (eMotionR.pNEW >= 20 && eMotionR.pNEW < 30)
+        else if (eMotionR.pNEW >= 20 && eMotionR.pNEW < 30)//選擇3
         {
-            if (old_select != 2)tone(Buzzer_PIN, 1318, 200);
-            old_select = 2;
-            digitalWrite(LED_1_PIN, OFF);
-            digitalWrite(LED_2_PIN, ON);
-            digitalWrite(LED_3_PIN, OFF);
+            if (old_select != 2){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 2;
+            }
         }
-        else if (eMotionR.pNEW >= 40)
+        else if (eMotionR.pNEW >= 40)//選擇4
         {
-            if (old_select != 3)tone(Buzzer_PIN, 1318, 200);
-            old_select = 3;
-            digitalWrite(LED_1_PIN, OFF);
-            digitalWrite(LED_2_PIN, OFF);
-            digitalWrite(LED_3_PIN, ON);
+            if (old_select != 3){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 3;
+            }
         }
     }
     else if(eMotionL.pNEW>=20)
     {
-        if (old_enter != 1)tone(Buzzer_PIN, 1318, 200);
-        old_enter = 1;
-        digitalWrite(LED_L_PIN, ON);
-        digitalWrite(LED_R_PIN, OFF);
-
+        if (old_enter != 1){
+            tone(Buzzer_PIN, 800, 200);
+            digitalWrite(LED_L_PIN, ON);
+            digitalWrite(LED_R_PIN, OFF);
+            old_enter = 1;
+        }
     }
 }
 void count_flag(unsigned char value)
@@ -224,10 +239,16 @@ void StateMachine_to_loop(unsigned char value)
     {
         case 0:
             readAllIR_flag=0;
+            LINE_following_VC_flag=0;
+            MotorRest();
             Selector();
-            SerialUSB.print(eMotionR.pNEW);
-            SerialUSB.print("\t");
-            SerialUSB.println(eMotionL.pNEW);
+//            SerialUSB.print(count_R);
+//            SerialUSB.print("\t");
+//            SerialUSB.print(count_L);
+//            SerialUSB.print("\t");
+//            SerialUSB.print(eMotionR.pNEW);
+//            SerialUSB.print("\t");
+//            SerialUSB.println(eMotionL.pNEW);
 
             break;
         case 1:
@@ -242,6 +263,10 @@ void StateMachine_to_loop(unsigned char value)
                 start_cont=0;
                 MotorRest();
                 sButton = 0;
+                eMotionR.pNEW=0;
+                eMotionL.pNEW=0;
+                count_L=0;
+                count_R=0;
             }
             readAllIR_values();
             IR_Max_Min();
@@ -252,6 +277,7 @@ void StateMachine_to_loop(unsigned char value)
                 //test_1m_flag=1;
                 readAllIR_flag=1;
                 LINE_following_VC_flag=1;
+                SerialUSB.println(velocity);
             }
 
             break;
