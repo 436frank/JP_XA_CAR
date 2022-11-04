@@ -11,16 +11,16 @@
 #include "ck_point.h"
 
 #define sample_time             0.0005f              // 控制時間(s)
-#define wheel_diameter          24.9f                // 輪直徑(mm)
+#define wheel_diameter          24.85f                // 輪直徑(mm)
 #define wheel_pulses            8                    // (pulses)
 #define encoder_resolution      (wheel_pulses * 4)   // (pulses/r)
-#define acceleration            0.002f               // 加速度(mm/0.5ms)
+#define acceleration            0.0025f              // 加速度 mm/0.5ms
 #define CAR_WIDE                100.0f               // 車寬(mm)
 const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0.449893 pulse
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
 const float p2r = ((wheel_diameter * PI) / (encoder_resolution * 85));//解析度放大85倍
 const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/0.5ms)
-#define PWMLimit  2000
+#define PWMLimit  1000
 #define center  300
 
 char vc_f=1;
@@ -39,6 +39,7 @@ void vc_Command(char vc);
 float vc_following();
 void LINE_following();
 void LINE_following_VC();
+int Calculate_Acc_dec_distance(float V1);
 
 /**()**/
 void Motor_control(int speed_L, int speed_R) {
@@ -46,13 +47,13 @@ void Motor_control(int speed_L, int speed_R) {
     if (speed_L > 0) {
         if (speed_L > PWMLimit) speed_L = PWMLimit;
         // Left motor
-        digitalWrite(MOTOR_DIR_L, LOW);
+        digitalWrite(MOTOR_DIR_L, HIGH);
         REG_TCC0_CC3 = speed_L;                               // TCC0 CC0 - on D3
         while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
 //        analogWrite(MOTOR_PWM_L, speed_L);
     } else {
         if (speed_L < -PWMLimit) speed_L = -PWMLimit;
-        digitalWrite(MOTOR_DIR_L, HIGH);
+        digitalWrite(MOTOR_DIR_L, LOW);
         REG_TCC0_CC3 = -speed_L;                               // TCC0 CC0 - on D3
         while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
 //        analogWrite(MOTOR_PWM_L, -speed_L);
@@ -62,14 +63,14 @@ void Motor_control(int speed_L, int speed_R) {
     if (speed_R > 0) {
         if (speed_R > PWMLimit) speed_R = PWMLimit;
         // Left motor
-        digitalWrite(MOTOR_DIR_R, LOW);
+        digitalWrite(MOTOR_DIR_R, HIGH);
         REG_TCC0_CC2 = speed_R;                               // TCC0 CC3 - on D2
         while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 //        analogWrite(MOTOR_PWM_R, speed_R);
     } else {
         if (speed_R < -PWMLimit) speed_R = -PWMLimit;
         // Left motor
-        digitalWrite(MOTOR_DIR_R, HIGH);
+        digitalWrite(MOTOR_DIR_R, LOW);
         REG_TCC0_CC2 = -speed_R;                               // TCC0 CC3 - on D2
         while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 //        analogWrite(MOTOR_PWM_R, -speed_R);
@@ -149,4 +150,10 @@ void LINE_following_park_well() {
     spd_L = b_pwm - deltaPWM;
     spd_R = b_pwm + deltaPWM;
     Motor_control(spd_L, spd_R);
+}
+int Calculate_Acc_dec_distance(float V1)
+{
+    int result=0;
+    result = (float)(vc_command*vc_command)-(velocity*velocity)/(2*acceleration );
+    return result;
 }

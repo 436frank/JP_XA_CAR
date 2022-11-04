@@ -9,12 +9,17 @@
 #include <Arduino.h>
 
 
-#define not_judge_of_pos_range 22.4375 //              50mm *  32/(22.7*PI())  =2872 pos
+#define all_white_val_max 1500
+#define all_black_val_min 1500
+#define not_judge_of_pos_range 50 //              50mm *  32/(22.7*PI())  =2872 pos
 //#define not_judge_of_pos_range 2872 //              50mm *  32/(22.7*PI())*128  =2872 pos
 #define stop_pos_range 44.875 //              100mm *  32/(22.7*PI())  =5744 pos
 //#define stop_pos_range 5744 //              100mm *  32/(22.7*PI())*128  =5744 pos
 #define not_judge_of_pos_range_hint 6.734 //              15mm *  32/(22.7*PI())*128  =862pos
 
+#define time_out_max 600 // 0.5ms *600 =300ms
+int time_out=0;
+bool Protect_flag=0;
 
 /*record line DATA Parameters*/
 unsigned long NOW_Time;//ms
@@ -36,9 +41,11 @@ float speed_integral =0;
 
 int test_1m_cont=0;
 uint8_t vc_flag_=0;
-int icont=0;
-uint8_t pcontRL_en=0;
 
+int tcont=0;
+
+uint8_t pcontRL_en=0;
+void Protect();
 void check_point();
 int Calculate_Acc_dec_distance();/** Calculate Acc dec distance Parameters **/
 /* to check_point Parameters*/
@@ -62,17 +69,46 @@ float pos_stop=0;//停車跑一段的範圍
 /* to check_point Parameters_END*/
 
 /* check_point*/
+void Protect()
+{
+    if(IRsensors[1]>all_white_val_max && IRsensors[2]>all_white_val_max && IRsensors[3]>all_white_val_max && IRsensors[4]>all_white_val_max && IRsensors[5]>all_white_val_max
+    || IRsensors[1]<all_black_val_min && IRsensors[2]<all_black_val_min && IRsensors[3]<all_black_val_min && IRsensors[4]<all_black_val_min && IRsensors[5]<all_black_val_min ) //IR1~5 = HIGH
+    {
+        if(Protect_flag!=1)
+        {
+            Protect_flag=1;
+         //tone(Buzzer_PIN,1000,100);
+            digitalWrite(LED_L_PIN,ON);
+        }
+        time_out++;
+        if(time_out>time_out_max)
+        {
+          sButton=0;
+        }
+    }
+    else
+    {
+        if(Protect_flag!=0)
+        {
+            Protect_flag=0;
+            time_out=0;
+            digitalWrite(LED_L_PIN,OFF);
+        }
+
+    }
+}
 void check_point()
 {
-
     if(IRsensors[1]>1500 && IRsensors[2]>1500 && IRsensors[3]>1500 && IRsensors[4]>1500 && IRsensors[5]>1500) //IR1~5 = HIGH  上鎖
     {
         point_cross_flag=1;
         pos_judge_cross= pos_now+not_judge_of_pos_range;  //所住的位置+上一段距離(POS)
         //tone(2,523,100);
+
     }
     if(point_cross_flag==1) //確認十字是否鎖上
     {
+
         if(pos_now < pos_judge_cross)//還沒離開範圍就鎖住左右IR
         {
             point_STOP_or_Hint_flag=0;
@@ -141,9 +177,3 @@ void check_point()
 
 }
 /* check_point_END*/
-int Calculate_Acc_dec_distance()
-{
-    int result=0;
-    result = velocity;
-    return result;
-}

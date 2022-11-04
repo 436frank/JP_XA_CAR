@@ -255,7 +255,7 @@ void StateMachine_to_loop(unsigned char value)
 
             if(start_cont==2000)
             {
-                Motor_control(800, 800);
+                Motor_control(500, 500);
             }
             if(start_cont==2500)
             {
@@ -277,7 +277,17 @@ void StateMachine_to_loop(unsigned char value)
                 //test_1m_flag=1;
                 readAllIR_flag=1;
                 LINE_following_VC_flag=1;
-                SerialUSB.println(velocity);
+
+//                SerialUSB.println(velocity);
+//                Protect();
+
+            }
+            else
+            {
+                eMotionR.pNEW=0;
+                eMotionL.pNEW=0;
+                count_L=0;
+                count_R=0;
             }
 
             break;

@@ -69,7 +69,12 @@ void loop()
 //    SerialUSB.println(gyr.z);
 //    delay(10);
     /**        IR        **/
-//
+//    readAllIR_flag=1;
+//        for (int i = 0; i < 7; ++i) {
+//        SerialUSB.print(IRsensors[i]);
+//        SerialUSB.print(i==6?'\n':'\t');
+//    }
+    //
 //        readAllIR_values();
 //        IR_calibrations();
 //        Lp = LINE_estimation(IRsensors);
@@ -96,6 +101,7 @@ void loop()
 //    REG_TCC0_CC3 = 4000;                               // TCC0 CC3 - on D2
 //    while (TCC0->SYNCBUSY.bit.CC3);                 // Wait for synchronization
 //    SerialUSB.println(pos_now);
+//    Motor_control(1000,1000);
     /** check_point **/
 //    check_point();
 }
@@ -116,10 +122,13 @@ void TC3_Handler()
         check_point();
         Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
         LINE_following_VC();
+        Protect();
     }
     checkButton();
+
     READ_QEI();
     QEI_filter();
+    if (tcont>3){tcont=0;} tcont++;
     // clear the interrupt flag
     REG_TC3_INTFLAG |= TC_INTFLAG_MC0;
 }
