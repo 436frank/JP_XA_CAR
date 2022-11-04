@@ -239,7 +239,8 @@ void checkButton() {
                 buttonPressed = LOW;            // button released confirmed
                 bReleaseCount = 0;              // reset released count value
 //                sButton++;                      // change Button status value
-
+                digitalWrite(LED_L_PIN,OFF);
+                digitalWrite(LED_R_PIN,OFF);
                 sButton=old_select;
                 start_flag=1;
                 tone(Buzzer_PIN,1318,200);
@@ -371,7 +372,7 @@ void setupPWM() {
 
     // Each timer counts up to a maximum or TOP value set by the PER register,
     // this determines the frequency of the PWM operation:
-    REG_TCC0_PER = 4000;                            // Set the frequency of the PWM on TCC0 to 12kHz
+    REG_TCC0_PER = 2400;                            // Set the frequency of the PWM on TCC0 to 12kHz
     while (TCC0->SYNCBUSY.bit.PER);                 // Wait for synchronization
 
     // Set the PWM signal to output 0% duty cycle
