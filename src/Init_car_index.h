@@ -6,6 +6,8 @@
 #define JP_XA_CAR_INIT_CAR_INDEX_H
 
 #endif //JP_XA_CAR_INIT_CAR_INDEX_H
+#include <SPI.h>
+
 /** Encoder **/
 #define Encoder_L_A 6
 #define Encoder_L_B 7
@@ -67,6 +69,15 @@ struct Motion_status {
 Motion_status eMotionR, eMotionL;
 float EstR_acceleration = 0, EstL_acceleration;
 volatile float count_L=0, count_R=0, Pcount_L=0, Pcount_R=0;  // initialize variables
+
+volatile float Pcount_C=0;
+volatile float omegaFeedBack=0;
+volatile float angleFeedBack=0;
+volatile float posFeedBack=0;
+volatile float velFeedBack=0;
+volatile float u_p=0;
+volatile float u_v=0;
+
 volatile float  Vcount_L=0, Vcount_R=0;
 float pos_now=0; //現在的pos位置
 float pos_old=0; //現在的pos位置
@@ -148,6 +159,7 @@ void Encoder_RB() {
     if (digitalRead(Encoder_R_A)==digitalRead(Encoder_R_B)) {count_R++;}
     else {count_R--;}
 }
+
 /** IR() **/
 void readAllIR_values() {
     digitalWrite(IR3_OUT,HIGH);
@@ -243,6 +255,7 @@ void checkButton() {
                 digitalWrite(LED_R_PIN,OFF);
                 sButton=old_select;
                 start_flag=1;
+                //start_cont=0;
                 tone(Buzzer_PIN,1318,200);
 //                if (sButton == 1) cCount = 0;     // reset
 //                if (sButton > 5) sButton = 0;       // the largest value of Button status is 3
@@ -333,7 +346,7 @@ void setupTimers()
 
     // timer TC3 counts up to CC0 value to generate 1ms interrupt,
     // this determines the frequency of the interrupt operation: Freq = 48Mhz/(N*CC0*Prescaler)
-    REG_TC3_COUNT16_CC0 =500;                    // Set the CC0 (period) register to 1000 for 1MHz clock  1kHZ  1ms
+    REG_TC3_COUNT16_CC0 =1000;                    // Set the CC0 (period) register to 1000 for 1MHz clock  1kHZ  1ms
     while (TC3->COUNT16.STATUS.bit.SYNCBUSY);     // Wait for synchronization
 
     NVIC_SetPriority(TC3_IRQn, 1);                // Set the Nested Vector Interrupt Controller (NVIC) priority for TC3 to 3 (0 highest)

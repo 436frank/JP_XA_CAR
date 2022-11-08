@@ -17,7 +17,7 @@
 //#define stop_pos_range 5744 //              100mm *  32/(22.7*PI())*128  =5744 pos
 #define not_judge_of_pos_range_hint 6.734 //              15mm *  32/(22.7*PI())*128  =862pos
 
-#define time_out_max 600 // 0.5ms *600 =300ms
+#define time_out_max 300 // 1ms *300 =300ms
 int time_out=0;
 bool Protect_flag=0;
 
@@ -77,8 +77,8 @@ void Protect()
         if(Protect_flag!=1)
         {
             Protect_flag=1;
-         //tone(Buzzer_PIN,1000,100);
-            digitalWrite(LED_L_PIN,ON);
+         tone(Buzzer_PIN,1000,100);
+//            digitalWrite(LED_L_PIN,ON);
         }
         time_out++;
         if(time_out>time_out_max)
@@ -92,7 +92,7 @@ void Protect()
         {
             Protect_flag=0;
             time_out=0;
-            digitalWrite(LED_L_PIN,OFF);
+//            digitalWrite(LED_L_PIN,OFF);
         }
 
     }

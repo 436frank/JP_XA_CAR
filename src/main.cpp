@@ -9,7 +9,13 @@
 const int csPin = PIN_SPI1_SS;  // Chip Select Pin
 bool useSPI = true;    // SPI use flag
 MPU6500_WE myMPU6500 = MPU6500_WE(&SPI1, csPin, useSPI);
+xyzFloat gValue ;
+xyzFloat gyr ;
+int a2=0;
+int a1=0;
+
 /**             **/
+void Observer();
 void setup()
 {
     AdcBooster();
@@ -18,26 +24,30 @@ void setup()
     setupPWM();
     SerialUSB.begin(115200);
     /**SPI MPU6500**/
-//    Wire.begin();
-//    delay(2000);//方便觀察
-//    if(!myMPU6500.init()){
-//        SerialUSB.println("MPU6500 does not respond");
-//    }
-//    else{
-//        SerialUSB.println("MPU6500 is connected");
-//    }
-//    SerialUSB.println("Position you MPU6500 flat and don't move it - calibrating...");
-//    delay(1000);
-//    myMPU6500.autoOffsets();
-//    SerialUSB.println("Done!");
-//    myMPU6500.enableGyrDLPF();
-//    //myMPU6500.disableGyrDLPF(MPU6500_BW_WO_DLPF_8800); // bandwdith without DLPF
-//    myMPU6500.setGyrDLPF(MPU6500_DLPF_6);
-//    myMPU6500.setSampleRateDivider(5);
-//    myMPU6500.setGyrRange(MPU6500_GYRO_RANGE_250);
-//    myMPU6500.setAccRange(MPU6500_ACC_RANGE_2G);
-//    myMPU6500.enableAccDLPF(true);
-//    myMPU6500.setAccDLPF(MPU6500_DLPF_6);
+    Wire.begin();
+
+    delay(2000);
+    if(!myMPU6500.init()){
+        SerialUSB.println("MPU6500 does not respond");
+    }
+    else{
+        SerialUSB.println("MPU6500 is connected");
+    }
+    SerialUSB.println("Position you MPU6500 flat and don't move it - calibrating...");
+    myMPU6500.setSPIClockSpeed(20000000);
+    delay(1000);
+    myMPU6500.autoOffsets();
+    SerialUSB.println("Done!");
+    myMPU6500.enableGyrDLPF();
+    //myMPU6500.disableGyrDLPF(MPU6500_BW_WO_DLPF_8800); // bandwdith without DLPF
+    myMPU6500.setGyrDLPF(MPU6500_DLPF_7);
+    myMPU6500.setSampleRateDivider(5);
+    myMPU6500.setGyrRange(MPU6500_GYRO_RANGE_2000);
+    myMPU6500.setAccRange(MPU6500_ACC_RANGE_8G);
+    myMPU6500.enableAccDLPF(true);
+    myMPU6500.setAccDLPF(MPU6500_DLPF_7);
+
+
     /**           **/
     /** Timer tc3 en **/
 //    NVIC_EnableIRQ(TC3_IRQn);
@@ -49,25 +59,31 @@ void loop()
 {
     /** MENU **/
     StateMachine_to_loop(sButton);
+
     /**SPI MPU6500 test**/
-//    xyzFloat gValue = myMPU6500.getGValues();
-//    xyzFloat gyr = myMPU6500.getGyrValues();
-//    float temp = myMPU6500.getTemperature();
-//    float resultantG = myMPU6500.getResultantG(gValue);
-//    SerialUSB.print(gValue.x);
+
+//    gyr = myMPU6500.getGyrValues();
+//    Observer();
+//    SerialUSB.print(a1);
 //    SerialUSB.print("\t");
-//    SerialUSB.print(gValue.y);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(gValue.z);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(resultantG);
-//    SerialUSB.print("\t");
-//    SerialUSB.print(gyr.x);
-//    SerialUSB.print("\t");
+    SerialUSB.print(pos_now);
+    SerialUSB.print("\t");
+    SerialUSB.print(velocity);
+    SerialUSB.print("\t");
+    SerialUSB.print(posFeedBack);
+    SerialUSB.print("\t");
+    SerialUSB.print(velFeedBack);
+    SerialUSB.print("\n");
+
 //    SerialUSB.print(gyr.y);
 //    SerialUSB.print("\t");
-//    SerialUSB.println(gyr.z);
-//    delay(10);
+//    SerialUSB.print(gyr.z);
+//    SerialUSB.print("\t");
+//    SerialUSB.print(gValue.z);
+//    SerialUSB.print("\n");
+
+
+    delay(10);
     /**        IR        **/
 //    readAllIR_flag=1;
 //        for (int i = 0; i < 7; ++i) {
@@ -125,10 +141,25 @@ void TC3_Handler()
         Protect();
     }
     checkButton();
-
     READ_QEI();
-    QEI_filter();
+    Observer();
+//    QEI_filter();
     if (tcont>3){tcont=0;} tcont++;
     // clear the interrupt flag
     REG_TC3_INTFLAG |= TC_INTFLAG_MC0;
+}
+void Observer() {
+    // wn = 0.08, zeta = 1, Kp = wn^2 = 0.0064, Kv = 2*zeta*wn = 0.16
+//    a2=micros();
+//            a1=micros()-a2;
+//    gValue = myMPU6500.getGValues();
+//    gyr = myMPU6500.getGyrValues();
+    Pcount_C = (Pcount_R + Pcount_L) / 2.0f;
+//    omegaFeedBack = -gyr.z;
+//    angleFeedBack = -gValue.z;
+    posFeedBack += u_p;
+    velFeedBack += u_v;
+    u_p = (0.14f * (Pcount_C - posFeedBack)) + velFeedBack;
+    u_v = (0.0064f * (Pcount_C - posFeedBack)) + ((gValue.y*9.80665/1000)* mm2p);
+
 }

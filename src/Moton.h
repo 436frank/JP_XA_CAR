@@ -14,20 +14,20 @@
 #define wheel_diameter          24.85f                // 輪直徑(mm)
 #define wheel_pulses            8                    // (pulses)
 #define encoder_resolution      (wheel_pulses * 4)   // (pulses/r)
-#define acceleration            0.0025f              // 加速度 mm/0.5ms
+#define acceleration            0.01f              // 加速度 10m/s
 #define CAR_WIDE                100.0f               // 車寬(mm)
 const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0.449893 pulse
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
 const float p2r = ((wheel_diameter * PI) / (encoder_resolution * 85));//解析度放大85倍
 const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/0.5ms)
-#define PWMLimit  1000
+#define PWMLimit  4000
 #define center  300
 
 char vc_f=1;
 //float vc_kp = 550, vc_ki = 11, vc_kd = 0;
 float vc_kp = 550, vc_ki = 35, vc_kd = 0;
-float vc_command =1*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
-int Kp=15, Kd=80, basePWM =600 ;
+float vc_command =0.6*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
+int Kp=40, Kd=300, basePWM =600 ;
 //int Kp=40, Kd=300, basePWM =600 ;
 float deltaPWM_ = 0;
 int error_new, error_old;
@@ -154,6 +154,6 @@ void LINE_following_park_well() {
 int Calculate_Acc_dec_distance(float V1)
 {
     int result=0;
-    result = (float)(vc_command*vc_command)-(velocity*velocity)/(2*acceleration );
+    result = (float)((vc_command*vc_command)-(velocity*velocity))/(2*acceleration );
     return result;
 }
