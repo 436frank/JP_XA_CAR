@@ -35,7 +35,7 @@ float all_road_speed_max[200];     //半徑
 
 char test_1m_flag=0;
 //float test_1m[2000];
-//float test_1_pwm[2000];
+float test_1_v[2000];
 //float test_1_cmd[2000];
 float speed_integral =0;
 

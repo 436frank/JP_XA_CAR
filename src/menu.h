@@ -161,10 +161,11 @@ void StateMachine(unsigned char value) {
 #endif
 /**  new_menu  **/
 void Selector();
+void Selector_QEI();
 void count(unsigned char value);
 void StateMachine_to_loop(unsigned char value);
 #ifdef new_menu
-void Selector()
+void Selector_QEI()
 {
     if(eMotionL.pNEW<20)
     {
@@ -184,9 +185,8 @@ void Selector()
                 digitalWrite(LED_3_PIN, OFF);
                 old_select = 0;
             }
-
         }
-        else if (eMotionR.pNEW >= 10 && eMotionR.pNEW < 20)//選擇2
+        else if (eMotionR.pNEW >= 10 && eMotionR.pNEW < 20)//選擇1
         {
             if (old_select != 1){
                 digitalWrite(LED_1_PIN, ON);
@@ -198,7 +198,7 @@ void Selector()
 
 
         }
-        else if (eMotionR.pNEW >= 20 && eMotionR.pNEW < 30)//選擇3
+        else if (eMotionR.pNEW >= 20 && eMotionR.pNEW < 30)//選擇2
         {
             if (old_select != 2){
                 tone(Buzzer_PIN, 1318, 200);
@@ -208,7 +208,7 @@ void Selector()
                 old_select = 2;
             }
         }
-        else if (eMotionR.pNEW >= 40)//選擇4
+        else if (eMotionR.pNEW >= 40 && eMotionR.pNEW < 50)//選擇3
         {
             if (old_select != 3){
                 tone(Buzzer_PIN, 1318, 200);
@@ -218,8 +218,132 @@ void Selector()
                 old_select = 3;
             }
         }
+        else if (eMotionR.pNEW >= 50 && eMotionR.pNEW < 60)//選擇4
+        {
+            if (old_select != 4){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 4;
+            }
+        }
+        else if (eMotionR.pNEW >= 60 && eMotionR.pNEW < 70)//選擇5
+        {
+            if (old_select != 5){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 5;
+            }
+        }
+        else if (eMotionR.pNEW >= 70 )                     //選擇6
+        {
+            if (old_select != 6){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 6;
+            }
+        }
     }
     else if(eMotionL.pNEW>=20)
+    {
+        if (old_enter != 1){
+            tone(Buzzer_PIN, 800, 200);
+            digitalWrite(LED_L_PIN, ON);
+            digitalWrite(LED_R_PIN, OFF);
+            old_enter = 1;
+        }
+    }
+}
+void Selector_Observer()
+{
+    if(Pcount_L<20)
+    {
+        if (old_enter != 0){
+            tone(Buzzer_PIN, 800, 200);
+            digitalWrite(LED_L_PIN, OFF);
+            digitalWrite(LED_R_PIN, OFF);
+            old_enter = 0;
+        }
+        if (Pcount_R < 10)
+        {
+            if (old_select != 0)
+            {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 0;
+            }
+        }
+        else if (Pcount_R >= 10 && Pcount_R < 20)//選擇1
+        {
+            if (old_select != 1){
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, OFF);
+                tone(Buzzer_PIN, 1318, 200);
+                old_select = 1;
+            }
+
+
+        }
+        else if (Pcount_R >= 20 && Pcount_R < 30)//選擇2
+        {
+            if (old_select != 2){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 2;
+            }
+        }
+        else if (Pcount_R >= 40 && Pcount_R < 50)//選擇3
+        {
+            if (old_select != 3){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 3;
+            }
+        }
+        else if (Pcount_R >= 50 && Pcount_R < 60)//選擇4
+        {
+            if (old_select != 4){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 4;
+            }
+        }
+        else if (Pcount_R >= 60 && Pcount_R < 70)//選擇5
+        {
+            if (old_select != 5){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 5;
+            }
+        }
+        else if (Pcount_R >= 70 )                     //選擇6
+        {
+            if (old_select != 6){
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 6;
+            }
+        }
+    }
+    else if(Pcount_L>=20)
     {
         if (old_enter != 1){
             tone(Buzzer_PIN, 800, 200);
@@ -241,7 +365,7 @@ void StateMachine_to_loop(unsigned char value)
             readAllIR_flag=0;
             LINE_following_VC_flag=0;
             MotorRest();
-            Selector();
+            Selector_Observer();
 //            SerialUSB.print(count_R);
 //            SerialUSB.print("\t");
 //            SerialUSB.print(count_L);
@@ -292,12 +416,15 @@ void StateMachine_to_loop(unsigned char value)
         case 3:
             if(start_cont==1000)
             {
-                Motor_control(900, 900);
+                Motor_control(1200, 1200);
 //                Motor_control(1200, 1200);
 //                Motor_control(1500, 1500);
+                test_1m_flag=1;//抓數據 旗標
             }
             if(start_cont>=2000)
             {
+                test_1m_flag=0;//關閉 抓數據旗標
+
                 start_flag=0;
                 start_cont=0;
                 MotorRest();
@@ -309,8 +436,28 @@ void StateMachine_to_loop(unsigned char value)
             }
             break;
         case 4:
+            for (int i = 0; i < test_1m_cont; ++i) {
+                SerialUSB.print(test_1_v[i]*p2mm);
+                SerialUSB.print("\n");
+//                SerialUSB.print(test_1_pwm[i]);
+//                SerialUSB.print("\t");
+//                SerialUSB.print(test_1_cmd[i]*p2mm,4);
+//                SerialUSB.print("\t");
+//                SerialUSB.println(speed_integral*p2mm,4);
+
+            }
+            start_flag=0;
+            start_cont=0;
+            MotorRest();
+            sButton = 0;
+            eMotionR.pNEW=0;
+            eMotionL.pNEW=0;
+            count_L=0;
+            count_R=0;
             break;
         case 5:
+            break;
+        case 6:
             break;
     }
 }

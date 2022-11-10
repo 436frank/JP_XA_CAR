@@ -25,8 +25,8 @@
 /** LED **/
 #define ON  LOW
 #define OFF HIGH
-#define LED_R_PIN 14
-#define LED_L_PIN 13
+#define LED_R_PIN 13
+#define LED_L_PIN 14
 #define LED_1_PIN 30
 #define LED_2_PIN 31
 #define LED_3_PIN 32

@@ -10,13 +10,14 @@ const int csPin = PIN_SPI1_SS;  // Chip Select Pin
 bool useSPI = true;    // SPI use flag
 int a2=0;
 int a1=0;
+bool cnt=0;
 
 /**             **/
 void Observer();
 void setup()
 {
     /** Timer tc3 OFF **/
-    NVIC_DisableIRQ(TC3_IRQn);
+
     /**  Init  **/
     AdcBooster();
     Init_Peripherals();
@@ -24,6 +25,7 @@ void setup()
     setupPWM();
     SerialUSB.begin(115200);
     /**  Init SPI MPU6500  **/
+    NVIC_DisableIRQ(TC3_IRQn);
     MPU6500_Init();
 //    mpu6500AutoOffset(1,1);
     /**  Timer tc3 en  **/
@@ -37,10 +39,10 @@ void setup()
 void loop()
 {
     /** MENU **/
-//    StateMachine_to_loop(sButton);
+    StateMachine_to_loop(sButton);
     /**SPI MPU6500 test**/
-//    SerialUSB.print(a1);
-//    SerialUSB.print("\t");
+//    SerialUSB.print(a2);
+//    SerialUSB.print("\n");
 
 //    SerialUSB.print(pos_now);
 //    SerialUSB.print("\t");
@@ -48,8 +50,8 @@ void loop()
 //    SerialUSB.print("\t");
 //    SerialUSB.print(posFeedBack);
 //    SerialUSB.print("\t");
-    SerialUSB.print(velFeedBack);
-    SerialUSB.print("\n");
+//    SerialUSB.print(velFeedBack);
+//    SerialUSB.print("\n");
 
 //    SerialUSB.print(sen.gyro.Z);
 //    SerialUSB.print("\t");
@@ -57,7 +59,7 @@ void loop()
 //    SerialUSB.print("\t");
 //    SerialUSB.print(sen.accel.Y);
 //    SerialUSB.print("\n");
-    delay(10);
+//    delay(10);
     /**        IR        **/
 //    readAllIR_flag=1;
 //        for (int i = 0; i < 7; ++i) {
@@ -98,6 +100,20 @@ void loop()
 /** TC3 Interrupt Service Routine **/
 void TC3_Handler()  //
 {
+//    if(cnt==0){
+//        digitalWrite(LED_L_PIN,OFF);
+//        cnt=1;
+//    }
+//    if(cnt==1){
+//        digitalWrite(LED_L_PIN,ON);
+//        cnt=0;
+//    }
+//    a1=micros();
+    if(test_1m_flag==1)
+    {
+        test_1_v[test_1m_cont]=velFeedBack;
+        test_1m_cont++;
+    }
     if ( start_flag==1)
     {
         if(start_cont<5000) start_cont++;
@@ -116,10 +132,10 @@ void TC3_Handler()  //
     }
     checkButton();
     READ_QEI();
-    QEI_filter();
+//    QEI_filter();
     read_MPU6500_Acc_Gyro();
     Observer();
-
+//    a2=micros()-a1;
 //    if (tcont>3){tcont=0;} tcont++;
     REG_TC3_INTFLAG |= TC_INTFLAG_MC0;// clear the interrupt flag
 }
