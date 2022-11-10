@@ -15,25 +15,23 @@ int a1=0;
 void Observer();
 void setup()
 {
+    /** Timer tc3 OFF **/
     NVIC_DisableIRQ(TC3_IRQn);
-    MPU6500_Init();
+    /**  Init  **/
     AdcBooster();
     Init_Peripherals();
     setupTimers();
     setupPWM();
     SerialUSB.begin(115200);
+    /**  Init SPI MPU6500  **/
+    MPU6500_Init();
+//    mpu6500AutoOffset(1,1);
+    /**  Timer tc3 en  **/
+    NVIC_EnableIRQ(TC3_IRQn);
+    /**  boot sound  **/
     tone(Buzzer_PIN, 500, 200);
     delay(100);
     tone(Buzzer_PIN, 1318, 200);
-    /**SPI MPU6500**/
-//    delay(2000);
-//    MPU6500_Init();
-//    mpu6500AutoOffset(1,1);
-
-    /**           **/
-    /** Timer tc3 en **/
-    NVIC_EnableIRQ(TC3_IRQn);
-    /**              **/
 }
 
 void loop()
@@ -41,17 +39,15 @@ void loop()
     /** MENU **/
 //    StateMachine_to_loop(sButton);
     /**SPI MPU6500 test**/
-
-
-//    Observer();
 //    SerialUSB.print(a1);
 //    SerialUSB.print("\t");
-    SerialUSB.print(pos_now);
-    SerialUSB.print("\t");
-    SerialUSB.print(velocity);
-    SerialUSB.print("\t");
-    SerialUSB.print(posFeedBack);
-    SerialUSB.print("\t");
+
+//    SerialUSB.print(pos_now);
+//    SerialUSB.print("\t");
+//    SerialUSB.print(velocity);
+//    SerialUSB.print("\t");
+//    SerialUSB.print(posFeedBack);
+//    SerialUSB.print("\t");
     SerialUSB.print(velFeedBack);
     SerialUSB.print("\n");
 
@@ -61,9 +57,7 @@ void loop()
 //    SerialUSB.print("\t");
 //    SerialUSB.print(sen.accel.Y);
 //    SerialUSB.print("\n");
-
-
-//    delay(10);
+    delay(10);
     /**        IR        **/
 //    readAllIR_flag=1;
 //        for (int i = 0; i < 7; ++i) {

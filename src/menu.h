@@ -257,7 +257,7 @@ void StateMachine_to_loop(unsigned char value)
             {
                 Motor_control(500, 500);
             }
-            if(start_cont==2000)
+            if(start_cont>=2000)
             {
                 start_flag=0;
                 start_cont=0;
@@ -290,6 +290,23 @@ void StateMachine_to_loop(unsigned char value)
 
             break;
         case 3:
+            if(start_cont==1000)
+            {
+                Motor_control(900, 900);
+//                Motor_control(1200, 1200);
+//                Motor_control(1500, 1500);
+            }
+            if(start_cont>=2000)
+            {
+                start_flag=0;
+                start_cont=0;
+                MotorRest();
+                sButton = 0;
+                eMotionR.pNEW=0;
+                eMotionL.pNEW=0;
+                count_L=0;
+                count_R=0;
+            }
             break;
         case 4:
             break;
