@@ -296,7 +296,7 @@ void Init_Peripherals()
     pinMode(IR5, INPUT);
     pinMode(IR_hint_L, INPUT);pinMode(IR_StartStop_R, INPUT);
     /** Init Encoder **/
-//Left wheel encoder pins and interrupts/
+    //Left wheel encoder pins and interrupts/
     pinMode(Encoder_L_A, INPUT);  pinMode(Encoder_L_B, INPUT);
     attachInterrupt(digitalPinToInterrupt(Encoder_L_A), Encoder_LA, CHANGE);
     attachInterrupt(digitalPinToInterrupt(Encoder_L_B), Encoder_LB, CHANGE);

@@ -252,12 +252,12 @@ void StateMachine_to_loop(unsigned char value)
 
             break;
         case 1:
-
-            if(start_cont==2000)
+//            start_flag=1;
+            if(start_cont==1000)
             {
                 Motor_control(500, 500);
             }
-            if(start_cont==2500)
+            if(start_cont==2000)
             {
                 start_flag=0;
                 start_cont=0;
@@ -277,10 +277,8 @@ void StateMachine_to_loop(unsigned char value)
                 //test_1m_flag=1;
                 readAllIR_flag=1;
                 LINE_following_VC_flag=1;
-
 //                SerialUSB.println(velocity);
 //                Protect();
-
             }
             else
             {
