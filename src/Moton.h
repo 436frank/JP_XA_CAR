@@ -15,7 +15,7 @@
 #define wheel_pulses            8                    // (pulses)
 #define encoder_resolution      (wheel_pulses * 4)   // (pulses/r)
 //#define acceleration            0.01f              // 加速度 10m/s
-#define acceleration            0.005f              // 加速度 5m/s
+#define acceleration            0.01f              // 加速度 5m/s
 #define CAR_WIDE                100.0f               // 車寬(mm)
 const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0.449893 pulse
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
@@ -46,14 +46,14 @@ void vc_Command(char mod);
 float vc_following();
 void LINE_following();
 void LINE_following_VC();
-void LINE_following_PD();
+void LINE_following_PC();
 void Calculate_road();
 int Calculate_Acc_dec_distance(float V1);
-vw PD();
-/** PV **/
+vw PC_PD();
+/** Pc-pd **/
 float vc_command =0;//; //2*mm2p  // MAX  OR  等速1.8m/s
 //float vc_kp_=240,vc_kv=9339,wc_kp=2.9,wc_kv=97.2; wn 0.0045
-float vc_kp_=107.1,vc_kv=5770.2,wc_kp=2.9,wc_kv=97.2;
+float Pc_kp=107.1,Pc_kd=5770.2,wc_kp=2.9,wc_kv=97.2;
 extern volatile float angleFeedBack;
 extern volatile float posFeedBack;
 extern volatile float old_posFeedBack;
@@ -71,21 +71,21 @@ void Calculate_road() {
         if (all_road_radius[i] > 999)all_road_radius[i] = 999;
     }
 }
-vw PD(){
+vw PC_PD(){
     pos_error=0;angle_error=0;
     vw output;
     pos_error=Speed_cmd_integral-posFeedBack;//Speed_cmd_integral
     angle_error=0-angleFeedBack;
-    output.vc= vc_kp_*pos_error + vc_kv *(pos_error-pos_error_old);
+    output.vc= Pc_kp*pos_error + Pc_kd *(pos_error-pos_error_old);
     output.wc= wc_kp*angle_error + wc_kv *(angle_error-angle_error_old);
     pos_error_old=pos_error;
     angle_error_old=angle_error;
     return output;
 }
-void following_PD() {
+void LINE_following_PC() {
     spd_L=0; spd_R=0;
     vw input;
-    input = PD();
+    input =PC_PD();
     spd_L = input.vc;//-input.wc;
     spd_R = input.vc;//+input.wc;
     Motor_control(spd_L, spd_R);

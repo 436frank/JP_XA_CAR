@@ -145,8 +145,7 @@ void TC3_Handler()  //
                 vc_Command(3);
                 break;
         }
-        LINE_following_PD();
-
+        LINE_following_PC();
     }
 //    a2=micros()-a1;
 //    if (tcont>3){tcont=0;} tcont++;
@@ -154,8 +153,8 @@ void TC3_Handler()  //
 }
 void Observer() {
     Pcount_C = (Pcount_R + Pcount_L) / 2.0f;
-    omegaFeedBack = -sen.gyro.Z;
-    angleFeedBack = -sen.angle.Z;
+    omegaFeedBack = -sen.gyro.Z;    // L- R+
+    angleFeedBack = -sen.angle.Z;   // L- R+
     posFeedBack += u_p;
     velFeedBack += u_v;
     u_p = (0.14f * (Pcount_C - posFeedBack)) + velFeedBack;

@@ -378,7 +378,7 @@ void StateMachine_to_loop(unsigned char value)
     switch (value)
     {
         case 0:
-            readAllIR_flag=1;
+            readAllIR_flag=0;
             LINE_following_VC_flag=0;
             MotorRest();
             Selector_Observer();
@@ -391,7 +391,6 @@ void StateMachine_to_loop(unsigned char value)
             delay(500);
                 IR_MAX_MIN_value_flag=0;
             clearAll();
-
             break;
         case 2:
             if(start_cont>=1000)
@@ -426,9 +425,9 @@ void StateMachine_to_loop(unsigned char value)
                 SerialUSB.print("\t");
                 SerialUSB.print(test_1_cmd[i]*p2mm,4);
                 SerialUSB.print("\t");
-                SerialUSB.print(test_1_pwm_r[i],1);
+                SerialUSB.print(test_1_pwm_r[i]*p2mm,1);
                 SerialUSB.print("\t");
-                SerialUSB.print(test_1_pwm_l[i],1);
+                SerialUSB.print(test_1_pwm_l[i]*p2mm,1);
                 SerialUSB.print("\n");
 //                SerialUSB.println(speed_integral*p2mm,4);
             }
@@ -455,6 +454,21 @@ void StateMachine_to_loop(unsigned char value)
             clearAll();
             break;
         case 6:
+            clear_();
+            delay(1000);
+            mpu6500AutoOffset(1000,100);
+            tone(Buzzer_PIN,500,100);
+            run_flag=1;
+            test_1m_flag=1;//抓數據 旗標
+            run_mod_flag=1;
+            delay(100);
+            run_mod_flag=2;
+            delay(200);
+            run_mod_flag=3;
+            delay(200);
+            run_flag=0;
+            test_1m_flag=0;//關閉 抓數據旗標
+            clearAll();
             break;
     }
 }
