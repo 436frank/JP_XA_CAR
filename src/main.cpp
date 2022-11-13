@@ -7,30 +7,27 @@
 
 /** SPI MPU6500 **/
 const int csPin = PIN_SPI1_SS;  // Chip Select Pin
-bool useSPI = true;    // SPI use flag
+//bool useSPI = true;    // SPI use flag
 int a2=0;
 int a1=0;
-bool cnt=0;
+bool cnt_=0;
 
 /**             **/
 void Observer();
 void setup()
 {
-    /** Timer tc3 OFF **/
-
     /**  Init  **/
     AdcBooster();
     Init_Peripherals();
-    setupTimers();
     setupPWM();
     SerialUSB.begin(115200);
     /**  Init SPI MPU6500  **/
-    NVIC_DisableIRQ(TC3_IRQn);
     MPU6500_Init();
 //    mpu6500AutoOffset(1,1);
-    /**  Timer tc3 en  **/
-    NVIC_EnableIRQ(TC3_IRQn);
+    /**  Init timer  **/
+    setupTimers();
     /**  boot sound  **/
+
     tone(Buzzer_PIN, 500, 200);
     delay(100);
     tone(Buzzer_PIN, 1318, 200);
@@ -43,14 +40,13 @@ void loop()
     /**SPI MPU6500 test**/
 //    SerialUSB.print(a2);
 //    SerialUSB.print("\n");
-
 //    SerialUSB.print(pos_now);
 //    SerialUSB.print("\t");
 //    SerialUSB.print(velocity);
 //    SerialUSB.print("\t");
-//    SerialUSB.print(posFeedBack);
+//    SerialUSB.print(omegaFeedBack);
 //    SerialUSB.print("\t");
-//    SerialUSB.print(velFeedBack);
+//    SerialUSB.print(omegaFeedBack);
 //    SerialUSB.print("\n");
 
 //    SerialUSB.print(sen.gyro.Z);
@@ -100,18 +96,11 @@ void loop()
 /** TC3 Interrupt Service Routine **/
 void TC3_Handler()  //
 {
-//    if(cnt==0){
-//        digitalWrite(LED_L_PIN,OFF);
-//        cnt=1;
-//    }
-//    if(cnt==1){
-//        digitalWrite(LED_L_PIN,ON);
-//        cnt=0;
-//    }
-//    a1=micros();
+
     if(test_1m_flag==1)
     {
         test_1_v[test_1m_cont]=velFeedBack;
+        test_1_v[test_1m_cont]=omegaFeedBack;
         test_1m_cont++;
     }
     if ( start_flag==1)
@@ -130,6 +119,10 @@ void TC3_Handler()  //
         LINE_following_VC();
         Protect();
     }
+    if ( IR_MAX_MIN_value_flag==1){
+        readAllIR_values();
+        IR_Max_Min();
+    }
     checkButton();
     READ_QEI();
 //    QEI_filter();
@@ -140,7 +133,6 @@ void TC3_Handler()  //
     REG_TC3_INTFLAG |= TC_INTFLAG_MC0;// clear the interrupt flag
 }
 void Observer() {
-
     Pcount_C = (Pcount_R + Pcount_L) / 2.0f;
     omegaFeedBack = -sen.gyro.Z;
     angleFeedBack = -sen.angle.Z;

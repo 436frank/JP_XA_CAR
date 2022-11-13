@@ -20,28 +20,63 @@ const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
 const float p2r = ((wheel_diameter * PI) / (encoder_resolution * 85));//解析度放大85倍
 const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/0.5ms)
-#define PWMLimit  4000
+#define PWMLimit  2400
 #define center  300
+typedef struct vc_wc{
+    float vc;
+    float wc;
+}vw;
 
 char vc_f=1;
 //float vc_kp = 550, vc_ki = 11, vc_kd = 0;
-float vc_kp = 550, vc_ki = 35, vc_kd = 0;
-float vc_command =0.6*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
+//float vc_kp = 550, vc_ki = 35, vc_kd = 0;
+float vc_kp = 200, vc_ki = 11, vc_kd = 0;
 int Kp=40, Kd=300, basePWM =600 ;
 //int Kp=40, Kd=300, basePWM =600 ;
 float deltaPWM_ = 0;
 int error_new, error_old;
 float vc_error_new, vc_error_old, vc_integral = 0;
-
+float Speed_integral=0;
+float Speed_cmd_integral=0;
 void Motor_control(int speed_L, int speed_R);
 void MotorRest();
-void vc_Command(char vc);
+void vc_Command(char mod);
 float vc_following();
 void LINE_following();
 void LINE_following_VC();
+void LINE_following_PV();
 int Calculate_Acc_dec_distance(float V1);
+vw PV();
+/** PV **/
+float vc_command =0;//; //2*mm2p  // MAX  OR  等速1.8m/s
+float vc_kp_=240,vc_kv=9339,wc_kp=3,wc_kv=97;
+extern volatile float angleFeedBack;
+extern volatile float posFeedBack;
+extern volatile float old_posFeedBack;
+extern volatile float old_angleFeedBack;
+extern volatile float pos_error_old;
+extern volatile float angle_error_old;
 
 /**()**/
+vw PV(){
+    float pos_error,angle_error;
+    vw output;
+    pos_error=Speed_cmd_integral-posFeedBack;
+    angle_error=0-angleFeedBack;
+    output.vc= vc_kp_*pos_error + vc_kv *(pos_error-pos_error_old);
+    output.wc= wc_kp*angle_error + wc_kv *(angle_error-angle_error_old);
+    pos_error_old=pos_error;
+    angle_error_old=angle_error;
+    return output;
+}
+void LINE_following_PV() {
+    float spd_L, spd_R;
+    vw input;
+    input = PV();
+    spd_L = input.vc-input.wc;
+    spd_R = input.vc+input.wc;
+    Motor_control(spd_L, spd_R);
+}
 void Motor_control(int speed_L, int speed_R) {
     // Left motor
     if (speed_L > 0) {
@@ -86,23 +121,23 @@ void MotorRest() {
     REG_TCC0_CC2 = 0;                               // TCC0 CC3 - on D2
     while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 }
-void vc_Command(char vc) {
-    switch (vc) {
+void vc_Command(char mod) {
+    switch (mod) {
         case 1:
             vc_command +=acceleration_p;//(sample_time * acceleration_p);
             break;
         case 2:
-            vc_command =acceleration_p;//acceleration_p;//(sample_time * acceleration_p);
+
             break;
         case 3:
             vc_command -= acceleration_p;//acceleration_p;//(sample_time * acceleration_p);
-
             if (vc_command <= 0)vc_command = 0;
             break;
-
-
+            Speed_integral+=velFeedBack;
+            Speed_cmd_integral+=vc_command;
     }
 }
+
 float vc_following() {
     float deltaPWM, vc;
     vc_error_new = vc_command - velocity;  //現在速度誤差

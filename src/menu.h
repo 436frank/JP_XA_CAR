@@ -8,7 +8,9 @@
 #include <Arduino.h>
 //#define old_menu
 #define new_menu
-int a=0;
+extern int a1;
+extern int a2;
+
 /**  old_menu  **/
 void StateMachine(unsigned char value);
 #ifdef old_check
@@ -160,11 +162,22 @@ void StateMachine(unsigned char value) {
 }
 #endif
 /**  new_menu  **/
-void Selector();
+void clearAll();
+void Selector_Observer();
 void Selector_QEI();
-void count(unsigned char value);
 void StateMachine_to_loop(unsigned char value);
 #ifdef new_menu
+void clearAll(){
+start_flag=0;
+IR_MAX_MIN_value_flag=0;
+start_cont=0;
+MotorRest();
+sButton = 0;
+eMotionR.pNEW=0;
+eMotionL.pNEW=0;
+count_L=0;
+count_R=0;
+}
 void Selector_QEI()
 {
     if(eMotionL.pNEW<20)
@@ -353,9 +366,6 @@ void Selector_Observer()
         }
     }
 }
-void count_flag(unsigned char value)
-{
-}
 void StateMachine_to_loop(unsigned char value)
 {
     unsigned char index;
@@ -366,34 +376,16 @@ void StateMachine_to_loop(unsigned char value)
             LINE_following_VC_flag=0;
             MotorRest();
             Selector_Observer();
-//            SerialUSB.print(count_R);
-//            SerialUSB.print("\t");
-//            SerialUSB.print(count_L);
-//            SerialUSB.print("\t");
-//            SerialUSB.print(eMotionR.pNEW);
-//            SerialUSB.print("\t");
-//            SerialUSB.println(eMotionL.pNEW);
-
+//            Selector_QEI();
             break;
         case 1:
-//            start_flag=1;
-            if(start_cont==1000)
-            {
+            delay(1000);
                 Motor_control(500, 500);
-            }
-            if(start_cont>=2000)
-            {
-                start_flag=0;
-                start_cont=0;
-                MotorRest();
-                sButton = 0;
-                eMotionR.pNEW=0;
-                eMotionL.pNEW=0;
-                count_L=0;
-                count_R=0;
-            }
-            readAllIR_values();
-            IR_Max_Min();
+                IR_MAX_MIN_value_flag=1;
+            delay(500);
+                IR_MAX_MIN_value_flag=0;
+            clearAll();
+
             break;
         case 2:
             if(start_cont>=1000)
@@ -406,56 +398,42 @@ void StateMachine_to_loop(unsigned char value)
             }
             else
             {
-                eMotionR.pNEW=0;
-                eMotionL.pNEW=0;
-                count_L=0;
-                count_R=0;
             }
 
             break;
         case 3:
-            if(start_cont==1000)
-            {
-                Motor_control(1200, 1200);
-//                Motor_control(1200, 1200);
-//                Motor_control(1500, 1500);
-                test_1m_flag=1;//抓數據 旗標
-            }
-            if(start_cont>=2000)
-            {
-                test_1m_flag=0;//關閉 抓數據旗標
+            delay(1000);
+            mpu6500AutoOffset(1,100);
+//            Motor_control(700, -700);
+//                Motor_control(950, -950);
+            Motor_control(1100, -1100);
+            test_1m_flag=1;//抓數據 旗標
+            delay(800);
+            test_1m_flag=0;//關閉 抓數據旗標
+            clearAll();
 
-                start_flag=0;
-                start_cont=0;
-                MotorRest();
-                sButton = 0;
-                eMotionR.pNEW=0;
-                eMotionL.pNEW=0;
-                count_L=0;
-                count_R=0;
-            }
             break;
         case 4:
+            NVIC_DisableIRQ(TC3_IRQn);
             for (int i = 0; i < test_1m_cont; ++i) {
-                SerialUSB.print(test_1_v[i]*p2mm);
+                SerialUSB.print(test_1_v[i],4);
                 SerialUSB.print("\n");
 //                SerialUSB.print(test_1_pwm[i]);
 //                SerialUSB.print("\t");
 //                SerialUSB.print(test_1_cmd[i]*p2mm,4);
 //                SerialUSB.print("\t");
 //                SerialUSB.println(speed_integral*p2mm,4);
-
             }
-            start_flag=0;
-            start_cont=0;
-            MotorRest();
-            sButton = 0;
-            eMotionR.pNEW=0;
-            eMotionL.pNEW=0;
-            count_L=0;
-            count_R=0;
+            NVIC_EnableIRQ(TC3_IRQn);
+//            SerialUSB.print(a2);
+//            SerialUSB.print("\n");
+            clearAll();
             break;
         case 5:
+            delay(1000);
+            mpu6500AutoOffset(1,100);
+
+            vc_Command(1);
             break;
         case 6:
             break;

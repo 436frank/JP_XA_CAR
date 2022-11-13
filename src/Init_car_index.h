@@ -52,6 +52,8 @@ int IR_vMax[7]={0, 0, 0, 0, 0, 0,0}, IR_vMin[7]={900, 900, 900, 900, 900, 900,90
 int Lp;// Weighted average
 int OLD_LPos=0;// old Weighted average
 bool readAllIR_flag=0;
+bool IR_MAX_MIN_value_flag=0;
+
 /** menu  variable **/
 int16_t start_cont=0;
 bool start_flag =0;
@@ -70,9 +72,13 @@ Motion_status eMotionR, eMotionL;
 float EstR_acceleration = 0, EstL_acceleration;
 volatile float count_L=0, count_R=0, Pcount_L=0, Pcount_R=0;  // initialize variables
 
+volatile float pos_error_old=0;
+volatile float angle_error_old=0;
 volatile float Pcount_C=0;
 volatile float omegaFeedBack=0;
+volatile float old_posFeedBack;
 volatile float angleFeedBack=0;
+volatile float old_angleFeedBack;
 volatile float posFeedBack=0;
 volatile float velFeedBack=0;
 volatile float u_p=0;

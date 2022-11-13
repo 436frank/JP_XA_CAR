@@ -20,7 +20,7 @@
 #define time_out_max 300 // 1ms *300 =300ms
 int time_out=0;
 bool Protect_flag=0;
-
+extern void clearAll();
 /*record line DATA Parameters*/
 unsigned long NOW_Time;//ms
 unsigned long old_time;//ms
@@ -37,7 +37,6 @@ char test_1m_flag=0;
 //float test_1m[2000];
 float test_1_v[2000];
 //float test_1_cmd[2000];
-float speed_integral =0;
 
 int test_1m_cont=0;
 uint8_t vc_flag_=0;
@@ -128,16 +127,15 @@ void check_point()
         {
             stop_point_cont++;
             if(stop_point_cont==2) {
-                pos_stop=pos_now+stop_pos_range;
+//                pos_stop=pos_now+stop_pos_range;
                 sButton = 0;
                 stop_point_cont = 0;
                 all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
                 all_PROMPT[prompt_cont]=(Pcount_R+Pcount_L)/2;
                 prompt_cont++;
-                vc_flag_++;
                 readAllIR_flag=1;
                 LINE_following_VC_flag=1;
-
+                clearAll();
 
             }
             if(stop_point_cont==1)
