@@ -10,7 +10,7 @@
 #define new_menu
 extern int a1;
 extern int a2;
-
+extern float Speed_cmd_integral;
 /**  old_menu  **/
 void StateMachine(unsigned char value);
 #ifdef old_check
@@ -177,6 +177,12 @@ eMotionR.pNEW=0;
 eMotionL.pNEW=0;
 count_L=0;
 count_R=0;
+}
+void clear_(){
+    Pcount_R=0;
+    Pcount_L=0;
+    count_L=0;
+    count_R=0;
 }
 void Selector_QEI()
 {
@@ -372,7 +378,7 @@ void StateMachine_to_loop(unsigned char value)
     switch (value)
     {
         case 0:
-            readAllIR_flag=0;
+            readAllIR_flag=1;
             LINE_following_VC_flag=0;
             MotorRest();
             Selector_Observer();
@@ -416,12 +422,14 @@ void StateMachine_to_loop(unsigned char value)
         case 4:
             NVIC_DisableIRQ(TC3_IRQn);
             for (int i = 0; i < test_1m_cont; ++i) {
-                SerialUSB.print(test_1_v[i],4);
+                SerialUSB.print(test_1_v[i]*p2mm,4);
+                SerialUSB.print("\t");
+                SerialUSB.print(test_1_cmd[i]*p2mm,4);
+                SerialUSB.print("\t");
+                SerialUSB.print(test_1_pwm_r[i],1);
+                SerialUSB.print("\t");
+                SerialUSB.print(test_1_pwm_l[i],1);
                 SerialUSB.print("\n");
-//                SerialUSB.print(test_1_pwm[i]);
-//                SerialUSB.print("\t");
-//                SerialUSB.print(test_1_cmd[i]*p2mm,4);
-//                SerialUSB.print("\t");
 //                SerialUSB.println(speed_integral*p2mm,4);
             }
             NVIC_EnableIRQ(TC3_IRQn);
@@ -430,10 +438,21 @@ void StateMachine_to_loop(unsigned char value)
             clearAll();
             break;
         case 5:
+            clear_();
             delay(1000);
-            mpu6500AutoOffset(1,100);
-
-            vc_Command(1);
+            mpu6500AutoOffset(1000,100);
+            tone(Buzzer_PIN,500,100);
+            run_flag=1;
+            test_1m_flag=1;//抓數據 旗標
+            run_mod_flag=1;
+            delay(200);
+            run_mod_flag=2;
+            delay(200);
+            run_mod_flag=3;
+            delay(200);
+            run_flag=0;
+            test_1m_flag=0;//關閉 抓數據旗標
+            clearAll();
             break;
         case 6:
             break;

@@ -34,9 +34,11 @@ float all_road_radius[200];     //半徑
 float all_road_speed_max[200];     //半徑
 
 char test_1m_flag=0;
-//float test_1m[2000];
+
+float test_1_pwm_r[1000];
+float test_1_pwm_l[1000];
 float test_1_v[2000];
-//float test_1_cmd[2000];
+float test_1_cmd[2000];
 
 int test_1m_cont=0;
 uint8_t vc_flag_=0;

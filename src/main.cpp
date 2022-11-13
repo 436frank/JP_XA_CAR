@@ -35,6 +35,7 @@ void setup()
 
 void loop()
 {
+
     /** MENU **/
     StateMachine_to_loop(sButton);
     /**SPI MPU6500 test**/
@@ -97,10 +98,17 @@ void loop()
 void TC3_Handler()  //
 {
 
+    checkButton();
+    READ_QEI();
+//    QEI_filter();
+    read_MPU6500_Acc_Gyro();
+    Observer();
     if(test_1m_flag==1)
     {
-        test_1_v[test_1m_cont]=velFeedBack;
-        test_1_v[test_1m_cont]=omegaFeedBack;
+        test_1_v[test_1m_cont]=vc_command;
+        test_1_cmd[test_1m_cont]=velFeedBack;
+        test_1_pwm_r[test_1m_cont]=Speed_cmd_integral;
+        test_1_pwm_l[test_1m_cont]=posFeedBack;
         test_1m_cont++;
     }
     if ( start_flag==1)
@@ -110,6 +118,8 @@ void TC3_Handler()  //
     if ( readAllIR_flag==1)
     {
         readAllIR_values();
+        check_point();
+
     }
     if ( LINE_following_VC_flag==1)
     {
@@ -123,11 +133,21 @@ void TC3_Handler()  //
         readAllIR_values();
         IR_Max_Min();
     }
-    checkButton();
-    READ_QEI();
-//    QEI_filter();
-    read_MPU6500_Acc_Gyro();
-    Observer();
+    if(run_flag==1){
+        switch (run_mod_flag) {
+            case 1:
+                vc_Command(1);
+                break;
+            case 2:
+                vc_Command(2);
+                break;
+            case 3:
+                vc_Command(3);
+                break;
+        }
+        LINE_following_PD();
+
+    }
 //    a2=micros()-a1;
 //    if (tcont>3){tcont=0;} tcont++;
     REG_TC3_INTFLAG |= TC_INTFLAG_MC0;// clear the interrupt flag

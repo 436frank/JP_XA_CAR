@@ -14,19 +14,21 @@
 #define wheel_diameter          24.85f                // 輪直徑(mm)
 #define wheel_pulses            8                    // (pulses)
 #define encoder_resolution      (wheel_pulses * 4)   // (pulses/r)
-#define acceleration            0.01f              // 加速度 10m/s
+//#define acceleration            0.01f              // 加速度 10m/s
+#define acceleration            0.005f              // 加速度 5m/s
 #define CAR_WIDE                100.0f               // 車寬(mm)
 const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0.449893 pulse
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
 const float p2r = ((wheel_diameter * PI) / (encoder_resolution * 85));//解析度放大85倍
-const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/0.5ms)
+const float acceleration_p = (acceleration * mm2p);  // 加速度(pulse/1ms)
 #define PWMLimit  2400
 #define center  300
 typedef struct vc_wc{
     float vc;
     float wc;
 }vw;
-
+float spd_L, spd_R;
+float pos_error=0,angle_error=0;
 char vc_f=1;
 //float vc_kp = 550, vc_ki = 11, vc_kd = 0;
 //float vc_kp = 550, vc_ki = 35, vc_kd = 0;
@@ -44,24 +46,35 @@ void vc_Command(char mod);
 float vc_following();
 void LINE_following();
 void LINE_following_VC();
-void LINE_following_PV();
+void LINE_following_PD();
+void Calculate_road();
 int Calculate_Acc_dec_distance(float V1);
-vw PV();
+vw PD();
 /** PV **/
 float vc_command =0;//; //2*mm2p  // MAX  OR  等速1.8m/s
-float vc_kp_=240,vc_kv=9339,wc_kp=3,wc_kv=97;
+//float vc_kp_=240,vc_kv=9339,wc_kp=2.9,wc_kv=97.2; wn 0.0045
+float vc_kp_=107.1,vc_kv=5770.2,wc_kp=2.9,wc_kv=97.2;
 extern volatile float angleFeedBack;
 extern volatile float posFeedBack;
 extern volatile float old_posFeedBack;
 extern volatile float old_angleFeedBack;
 extern volatile float pos_error_old;
 extern volatile float angle_error_old;
-
+bool run_flag=0;
+char run_mod_flag=0;
 /**()**/
-vw PV(){
-    float pos_error,angle_error;
+void Calculate_road() {
+    for (int i = prompt_cont; i > 0; --i) {
+        all_road_distance[i] = all_PROMPT[i] - all_PROMPT[i - 1];
+        all_road_distance_mm[i] = all_road_distance[i] * p2mm;
+        all_road_radius[i] = abs((all_road_distance_mm[i] / 10) / ((all_PROMPT_w[i] - all_PROMPT_w[i - 1]) * p2r));
+        if (all_road_radius[i] > 999)all_road_radius[i] = 999;
+    }
+}
+vw PD(){
+    pos_error=0;angle_error=0;
     vw output;
-    pos_error=Speed_cmd_integral-posFeedBack;
+    pos_error=Speed_cmd_integral-posFeedBack;//Speed_cmd_integral
     angle_error=0-angleFeedBack;
     output.vc= vc_kp_*pos_error + vc_kv *(pos_error-pos_error_old);
     output.wc= wc_kp*angle_error + wc_kv *(angle_error-angle_error_old);
@@ -69,13 +82,14 @@ vw PV(){
     angle_error_old=angle_error;
     return output;
 }
-void LINE_following_PV() {
-    float spd_L, spd_R;
+void following_PD() {
+    spd_L=0; spd_R=0;
     vw input;
-    input = PV();
-    spd_L = input.vc-input.wc;
-    spd_R = input.vc+input.wc;
+    input = PD();
+    spd_L = input.vc;//-input.wc;
+    spd_R = input.vc;//+input.wc;
     Motor_control(spd_L, spd_R);
+
 }
 void Motor_control(int speed_L, int speed_R) {
     // Left motor
@@ -133,9 +147,9 @@ void vc_Command(char mod) {
             vc_command -= acceleration_p;//acceleration_p;//(sample_time * acceleration_p);
             if (vc_command <= 0)vc_command = 0;
             break;
-            Speed_integral+=velFeedBack;
-            Speed_cmd_integral+=vc_command;
     }
+    Speed_integral+=velFeedBack;
+    Speed_cmd_integral+=vc_command;
 }
 
 float vc_following() {
