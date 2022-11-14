@@ -391,7 +391,7 @@ void setupPWM() {
 
     // Each timer counts up to a maximum or TOP value set by the PER register,
     // this determines the frequency of the PWM operation:
-    REG_TCC0_PER = 2400;                            // Set the frequency of the PWM on TCC0 to 12kHz
+    REG_TCC0_PER = 2400;                            // Set the frequency of the PWM on TCC0 to 20kHz
     while (TCC0->SYNCBUSY.bit.PER);                 // Wait for synchronization
 
     // Set the PWM signal to output 0% duty cycle

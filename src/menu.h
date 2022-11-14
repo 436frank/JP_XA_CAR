@@ -377,14 +377,14 @@ void StateMachine_to_loop(unsigned char value)
     unsigned char index;
     switch (value)
     {
-        case 0:
+        case 0:  //選擇模式
             readAllIR_flag=0;
             LINE_following_VC_flag=0;
             MotorRest();
             Selector_Observer();
 //            Selector_QEI();
             break;
-        case 1:
+        case 1: //取IR最大最小
             delay(1000);
                 Motor_control(500, 500);
                 IR_MAX_MIN_value_flag=1;
@@ -408,7 +408,7 @@ void StateMachine_to_loop(unsigned char value)
             break;
         case 3:
             delay(1000);
-            mpu6500AutoOffset(1,100);
+            mpu6500AutoOffset(1000,100);
 //            Motor_control(700, -700);
 //                Motor_control(950, -950);
             Motor_control(1100, -1100);

@@ -15,7 +15,7 @@
 #define wheel_pulses            8                    // (pulses)
 #define encoder_resolution      (wheel_pulses * 4)   // (pulses/r)
 //#define acceleration            0.01f              // 加速度 10m/s
-#define acceleration            0.01f              // 加速度 5m/s
+#define acceleration            0.05f              // 加速度 5m/s
 #define CAR_WIDE                100.0f               // 車寬(mm)
 const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0.449893 pulse
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
