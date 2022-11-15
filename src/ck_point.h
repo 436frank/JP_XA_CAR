@@ -4,10 +4,9 @@
 
 #ifndef JP_XA_CAR_CK_POINT_H
 #define JP_XA_CAR_CK_POINT_H
-
 #endif //JP_XA_CAR_CK_POINT_H
-#include <Arduino.h>
 
+#include <Arduino.h>
 
 #define all_white_val_max 1500
 #define all_black_val_min 1500
@@ -16,12 +15,11 @@
 #define stop_pos_range 44.875 //              100mm *  32/(22.7*PI())  =5744 pos
 //#define stop_pos_range 5744 //              100mm *  32/(22.7*PI())*128  =5744 pos
 #define not_judge_of_pos_range_hint 6.734 //              15mm *  32/(22.7*PI())*128  =862pos
-
-#define time_out_max 300 // 1ms *300 =300ms
+#define time_out_max 200 // 1ms *300 =300ms
 int time_out=0;
 bool Protect_flag=0;
 extern void clearAll();
-/*record line DATA Parameters*/
+/**record line DATA Parameters**/
 unsigned long NOW_Time;//ms
 unsigned long old_time;//ms
 //char check_point =0;
@@ -48,28 +46,22 @@ int tcont=0;
 uint8_t pcontRL_en=0;
 void Protect();
 void check_point();
-int Calculate_Acc_dec_distance();/** Calculate Acc dec distance Parameters **/
-/* to check_point Parameters*/
+/**  Calculate Acc dec distance Parameters **/
+int Calculate_Acc_dec_distance();
+/**  to check_point Parameters  **/
 int park_well_cont=0;
 uint8_t point_cross_flag=0 ;        //preset = 0
 uint8_t point_STOP_or_Hint_flag=1 ; //preset = 1     控制 是否 開啟 讀 左右符號
-
-uint8_t stop_point_cont=0; //起終點計數
+uint8_t stop_point_cont=0;      //起終點計數
 uint8_t stop_point_state=0;     //起終點現在狀態
 uint8_t old_stop_point_state=0; //起終點過去狀態
-
-
-
 uint8_t hint_point_state=0;     //提示符號現在狀態
 uint8_t old_hint_point_state=0; //提示符號過去狀態
 uint8_t hint_point_buzz_state=0;
-
-
 float pos_judge_cross=0;//十字鎖住的範圍
 float pos_stop=0;//停車跑一段的範圍
-/* to check_point Parameters_END*/
-
-/* check_point*/
+/**  to check_point Parameters_END  **/
+/**  check_point  **/
 void Protect()
 {
     if(IRsensors[1]>all_white_val_max && IRsensors[2]>all_white_val_max && IRsensors[3]>all_white_val_max && IRsensors[4]>all_white_val_max && IRsensors[5]>all_white_val_max
@@ -84,7 +76,8 @@ void Protect()
         time_out++;
         if(time_out>time_out_max)
         {
-          sButton=0;
+            LINE_flag=0;
+            sButton=0;
         }
     }
     else
@@ -105,7 +98,6 @@ void check_point()
         point_cross_flag=1;
         pos_judge_cross= pos_now+not_judge_of_pos_range;  //所住的位置+上一段距離(POS)
         //tone(2,523,100);
-
     }
     if(point_cross_flag==1) //確認十字是否鎖上
     {

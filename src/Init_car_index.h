@@ -4,9 +4,11 @@
 
 #ifndef JP_XA_CAR_INIT_CAR_INDEX_H
 #define JP_XA_CAR_INIT_CAR_INDEX_H
-
 #endif //JP_XA_CAR_INIT_CAR_INDEX_H
+
+
 #include <SPI.h>
+#include "mpu6500.h"
 
 /** Encoder **/
 #define Encoder_L_A 6
@@ -44,6 +46,7 @@
 #define IR_StartStop_R A6
 #define IRmin         5
 #define IRmax         4000
+#define on_the_LINE_IR_val 1159
 /** IR variable **/
 unsigned int cCount=0;    // calibration count
 unsigned char IRindex[7] = {A1, A2, A0, A3, A4, A5, A6};
@@ -53,14 +56,11 @@ int Lp;// Weighted average
 int OLD_LPos=0;// old Weighted average
 bool readAllIR_flag=0;
 bool IR_MAX_MIN_value_flag=0;
-
+bool LINE_flag=0;
 /** menu  variable **/
 int16_t start_cont=0;
-bool start_flag =0;
-
-
+bool start_flag =0;//
 /** Encoder variable **/
-
 struct Motion_status {
     float  pOLD;
     float  pNEW;
@@ -71,7 +71,6 @@ struct Motion_status {
 Motion_status eMotionR, eMotionL;
 float EstR_acceleration = 0, EstL_acceleration;
 volatile float count_L=0, count_R=0, Pcount_L=0, Pcount_R=0;  // initialize variables
-
 volatile float pos_error_old=0;
 volatile float angle_error_old=0;
 volatile float Pcount_C=0;
@@ -83,11 +82,9 @@ volatile float posFeedBack=0;
 volatile float velFeedBack=0;
 volatile float u_p=0;
 volatile float u_v=0;
-
 volatile float  Vcount_L=0, Vcount_R=0;
 float pos_now=0; //現在的pos位置
 float pos_old=0; //現在的pos位置
-
 float velocity = 0;
 /** Button variable **/
 boolean button, buttonPressed;
@@ -98,24 +95,26 @@ bool LINE_following_VC_flag=0;
 /**  selector variable **/
 uint8_t old_select=0;
 uint8_t old_enter=0;
-
+/**  moton variable **/
+extern const float mm2p;
 /**                    **/
-void readAllIR_values();
-void IR_calibrations();
-void IR_Max_Min();
-int LINE_estimation(int IRvalues[]);
-
-
+void READ_QEI();
+void Observer();
+void QEI_filter();
 void Encoder_LA();
 void Encoder_LB();
 void Encoder_RA();
 void Encoder_RB();
-
-void Init_Peripherals();
+void readAllIR_values();
+void IR_calibrations();
+void IR_Max_Min();
+int LINE_estimation(int IRvalues[]);
 void checkButton();
+void Init_Peripherals();
 void AdcBooster();
 void setupTimers();
 void setupPWM();
+
 
 /** Encoder() **/
 void READ_QEI() {
@@ -127,6 +126,16 @@ void READ_QEI() {
     Pcount_L = count_L;
 
 }
+void Observer() {
+    Pcount_C = (Pcount_R + Pcount_L) / 2.0f;
+    omegaFeedBack = -sen.gyro.Z;    // L- R+
+    angleFeedBack = -sen.angle.Z;   // L- R+
+    posFeedBack += u_p;
+    velFeedBack += u_v;
+    u_p = (0.14f * (Pcount_C - posFeedBack)) + velFeedBack;
+    u_v = (0.0064f * (Pcount_C - posFeedBack)) + (sen.accel.Y * mm2p);
+
+}  //感測器融合
 void QEI_filter() {
     pos_now=((eMotionL.pNEW + eMotionR.pNEW)/2);  //pos 左右相加/2
     velocity=((eMotionL.vNEW + eMotionR.vNEW)/2);  //pos 左右相加/2
@@ -165,7 +174,6 @@ void Encoder_RB() {
     if (digitalRead(Encoder_R_A)==digitalRead(Encoder_R_B)) {count_R++;}
     else {count_R--;}
 }
-
 /** IR() **/
 void readAllIR_values() {
     digitalWrite(IR3_OUT,HIGH);
@@ -205,14 +213,8 @@ void IR_Max_Min() {
 }
 int LINE_estimation(int IRvalues[]) {
     float temp_n = 0, temp_d = 0;
-//    unsigned char ind;
     int LPos;
-//    for (ind = 1; ind < 6; ind++) {
-//        temp_n += (float) IRvalues[ind] * (6.0 - ind);
-//        temp_d += (float) IRvalues[ind];
-//    }
-//    LPos = (int) (temp_n / temp_d * 100.0);
-    if(IRvalues[3]>1159 || IRvalues[2]>1159 || IRvalues[4]>1159 || IRvalues[5]>1159 || IRvalues[1]>1159)
+    if(IRvalues[3]>on_the_LINE_IR_val || IRvalues[2]>on_the_LINE_IR_val || IRvalues[4]>on_the_LINE_IR_val || IRvalues[5]>on_the_LINE_IR_val || IRvalues[1]>on_the_LINE_IR_val)
     {
         temp_n=(float) 1*IRvalues[1]+2*IRvalues[2]+3*IRvalues[3]+4*IRvalues[4]+5*IRvalues[5];
         temp_d=(float) IRvalues[1]+IRvalues[2]+IRvalues[3]+IRvalues[4]+IRvalues[5];
@@ -276,17 +278,17 @@ void Init_Peripherals()
     analogReadResolution(12);   // ADC: 0~4095
     analogWriteResolution(12);  // PWM: 0~4095
     /** Init Button Buzzer Led */
-    pinMode(Button_PIN, INPUT);
-    pinMode(Buzzer_PIN, OUTPUT);
-    pinMode(LED_1_PIN , OUTPUT);
-    pinMode(LED_2_PIN , OUTPUT);
-    pinMode(LED_3_PIN , OUTPUT);
-    pinMode(LED_L_PIN , OUTPUT); pinMode(LED_R_PIN, OUTPUT);
-    digitalWrite(LED_1_PIN,OFF);
-    digitalWrite(LED_2_PIN,OFF);
-    digitalWrite(LED_3_PIN,OFF);
-    digitalWrite(LED_L_PIN,OFF);
-    digitalWrite(LED_R_PIN,OFF);
+    pinMode(Button_PIN, INPUT); //設為輸入
+    pinMode(Buzzer_PIN, OUTPUT);//設為輸出
+    pinMode(LED_1_PIN , OUTPUT);//設為輸出
+    pinMode(LED_2_PIN , OUTPUT);//設為輸出
+    pinMode(LED_3_PIN , OUTPUT);//設為輸出
+    pinMode(LED_L_PIN , OUTPUT); pinMode(LED_R_PIN, OUTPUT);//設為輸出
+    digitalWrite(LED_1_PIN,OFF);//LED關閉
+    digitalWrite(LED_2_PIN,OFF);//LED關閉
+    digitalWrite(LED_3_PIN,OFF);//LED關閉
+    digitalWrite(LED_L_PIN,OFF);//LED關閉
+    digitalWrite(LED_R_PIN,OFF);//LED關閉
     /** Init MOTOR **/
     pinMode(MOTOR_DIR_L, OUTPUT);pinMode(MOTOR_PWM_L, OUTPUT);
     pinMode(MOTOR_DIR_R, OUTPUT);pinMode(MOTOR_PWM_R, OUTPUT);
@@ -311,7 +313,6 @@ void Init_Peripherals()
     attachInterrupt(digitalPinToInterrupt(Encoder_R_A), Encoder_RA, CHANGE);
     attachInterrupt(digitalPinToInterrupt(Encoder_R_B), Encoder_RB, CHANGE);
 }
-// settings for faster ADC speed, for 7 IRs ~ 226us
 void AdcBooster() {
     ADC->CTRLA.bit.ENABLE = 0;                      // Disable ADC
     while (ADC->STATUS.bit.SYNCBUSY == 1);             // Wait for synchronization
@@ -322,8 +323,7 @@ void AdcBooster() {
     ADC->SAMPCTRL.reg = 0x03;                       // Sampling Time Length = 3
     ADC->CTRLA.bit.ENABLE = 1;                      // Enable ADC
     while (ADC->STATUS.bit.SYNCBUSY == 1);             // Wait for synchronization
-} // AdcBooster
-// setup 1ms interrupt using timer TC3, and clock source GCLK5
+}
 void setupTimers()
 {
     REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |           // Set the duty cycle to 50/50 when odd division factor used
