@@ -48,11 +48,12 @@ void TC3_Handler()
         check_point();
 
     }
-    if (LINE_following_VC_flag == 1) {
+    if (LINE_following_PC_flag == 1) {
         IR_calibrations();
         check_point();
+        vc_Command(2);
         Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
-        LINE_following_VC();
+        LINE_following_PC();
         Protect();
     }
     if (LINE_flag == 1) {

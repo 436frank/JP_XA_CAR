@@ -92,11 +92,14 @@ unsigned char sButton = 0;  // status of Button
 unsigned int bPressCount = 0, bReleaseCount=0;
 /** LINE_following flag**/
 bool LINE_following_VC_flag=0;
+bool LINE_following_PC_flag = 0;
 /**  selector variable **/
 uint8_t old_select=0;
 uint8_t old_enter=0;
 /**  moton variable **/
 extern const float mm2p;
+/**    mpu6500 variable   **/
+bool mpu6500_set_flag=0;
 /**                    **/
 void READ_QEI();
 void Observer();
@@ -262,6 +265,7 @@ void checkButton() {
                 digitalWrite(LED_L_PIN,OFF);
                 digitalWrite(LED_R_PIN,OFF);
                 sButton=old_select;
+                mpu6500_set_flag=1;
                 start_flag=1;
                 //start_cont=0;
                 tone(Buzzer_PIN,1318,200);

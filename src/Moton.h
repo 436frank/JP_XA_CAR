@@ -30,8 +30,10 @@ float spd_L, spd_R;
 float pos_error=0,angle_error=0;
 char vc_f=1;
 float vc_kp = 200, vc_ki = 11, vc_kd = 0; //VC_PI
-int Kp=40, Kd=300, basePWM =0 ;     //LINE_PD
+int Kp=1, Kd=1, basePWM =0 ;     //LINE_PD
 //int Kp=40, Kd=300, basePWM =600 ; //LINE_PD
+float deltaPWM=0;
+float angle_velocity=0;
 int error_new, error_old;
 float vc_error_new, vc_error_old, vc_integral = 0;
 float Speed_integral=0;
@@ -47,14 +49,14 @@ void Motor_control(int speed_L, int speed_R);
 void MotorRest();
 void vc_Command(char mod);
 float vc_following();
-void LINE_following();
+float LINE_following();
 void LINE_following_VC();
 void LINE_following_PC();
 void Calculate_road();
 int Calculate_Acc_dec_distance(float V1);
 vw PC_PD();
 /** Pc-PD **/
-float vc_command =0;//; //2*mm2p  // MAX  OR  等速1.8m/s
+float vc_command =0.1*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
 //float vc_kp_=240,vc_kv=9339,wc_kp=2.9,wc_kv=97.2; wn 0.0045
 float Pc_kp=107.1,Pc_kd=5770.2;
 float wc_kp=2.9  ,wc_kd=97.2;
@@ -105,11 +107,12 @@ void MotorRest() {
     REG_TCC0_CC2 = 0;                               // TCC0 CC3 - on D2
     while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 }
-vw PC_PD(){
+vw PC_WC_PD(){
     pos_error=0;angle_error=0;
+    angle_velocity+=LINE_following();
     vw output;
     pos_error=Speed_cmd_integral-posFeedBack;//Speed_cmd_integral
-    angle_error=0-angleFeedBack;
+    angle_error=angle_velocity-angleFeedBack;
     output.vc= Pc_kp*pos_error + Pc_kd *(pos_error-pos_error_old);
     output.wc= wc_kp*angle_error + wc_kd *(angle_error-angle_error_old);
     pos_error_old=pos_error;
@@ -119,9 +122,9 @@ vw PC_PD(){
 void LINE_following_PC() {
     spd_L=0; spd_R=0;
     vw input;
-    input =PC_PD();
-    spd_L = input.vc-input.wc;
-    spd_R = input.vc+input.wc;
+    input =PC_WC_PD();
+    spd_L = 0-input.wc;
+    spd_R = 0+input.wc;
     Motor_control(spd_L, spd_R);
 
 }
@@ -156,14 +159,15 @@ float vc_following() {
     vc = deltaPWM;
     return vc;
 }
-void LINE_following() {
-    float deltaPWM, spd_L, spd_R;
+float LINE_following() {
+    float  spd_L, spd_R;
     error_new = center - Lp;
     deltaPWM = Kp * error_new + Kd * (error_new - error_old);
     error_old = error_new;
-    spd_L = basePWM - deltaPWM;
-    spd_R = basePWM + deltaPWM;
-    Motor_control(spd_L, spd_R);
+//    spd_L = basePWM - deltaPWM;
+//    spd_R = basePWM + deltaPWM;
+//    Motor_control(spd_L, spd_R);
+    return deltaPWM;
 }
 void LINE_following_VC() {
     float spd_L, spd_R, vc, deltaPWM;

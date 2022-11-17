@@ -12,6 +12,7 @@
 /**  variable  **/
 extern float Speed_cmd_integral;
 
+
 /**  old_menu  **/
 void StateMachine(unsigned char value);
 #ifdef old_check
@@ -185,6 +186,8 @@ void clear_() {
     Pcount_L = 0;
     count_L = 0;
     count_R = 0;
+
+
 }
 void Selector_QEI() {
     if (eMotionL.pNEW < 20) {
@@ -365,7 +368,8 @@ void StateMachine_to_loop(unsigned char value)
     {
         case 0:  //選擇模式
             readAllIR_flag = 0;
-            LINE_following_VC_flag = 0;
+            LINE_following_PC_flag = 0;
+            LINE_flag=0;
             MotorRest();
             Selector_Observer();
             break;
@@ -377,12 +381,15 @@ void StateMachine_to_loop(unsigned char value)
             IR_MAX_MIN_value_flag = 0;
             clearAll();
             break;
-        case 2:
-            clear_();
-            delay(1000);
+        case 2: //搜尋
+            if(mpu6500_set_flag==1){
+                delay(200);
+                clear_();
+                mpu6500AutoOffset(1000, 100);
+                mpu6500_set_flag=0;
+            }
             readAllIR_flag = 1;
-            LINE_following_VC_flag = 1;
-            Protect();
+            LINE_following_PC_flag = 1;
             break;
         case 3:
             delay(1000);
@@ -412,11 +419,6 @@ void StateMachine_to_loop(unsigned char value)
             clearAll();
             break;
         case 5:
-            clear_();
-            delay(1000);
-            readAllIR_flag = 1;
-            mpu6500AutoOffset(1000, 100);
-            LINE_flag = 1;
             break;
         case 6:
             clear_();
