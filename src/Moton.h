@@ -30,7 +30,7 @@ float spd_L, spd_R;
 float pos_error=0,angle_error=0;
 char vc_f=1;
 float vc_kp = 200, vc_ki = 11, vc_kd = 0; //VC_PI
-int Kp=1, Kd=1, basePWM =0 ;     //LINE_PD
+float Kp=0.01, Kd=1, basePWM =0 ;     //LINE_PD
 //int Kp=40, Kd=300, basePWM =600 ; //LINE_PD
 float deltaPWM=0;
 float angle_velocity=0;
@@ -56,10 +56,10 @@ void Calculate_road();
 int Calculate_Acc_dec_distance(float V1);
 vw PC_PD();
 /** Pc-PD **/
-float vc_command =0.1*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
+float vc_command =0.5*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
 //float vc_kp_=240,vc_kv=9339,wc_kp=2.9,wc_kv=97.2; wn 0.0045
-float Pc_kp=107.1,Pc_kd=5770.2;
-float wc_kp=2.9  ,wc_kd=97.2;
+float Pc_kp=74.3,Pc_kd=4580.6;
+float wc_kp=2.2  ,wc_kd=21.4;
 bool run_flag=0;
 char run_mod_flag=0;
 /**()**/
@@ -107,6 +107,16 @@ void MotorRest() {
     REG_TCC0_CC2 = 0;                               // TCC0 CC3 - on D2
     while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 }
+float LINE_following() {
+    float  spd_L, spd_R;
+    error_new = center - Lp;
+    deltaPWM = Kp * error_new + Kd * (error_new - error_old);
+    error_old = error_new;
+//    spd_L = basePWM - deltaPWM;
+//    spd_R = basePWM + deltaPWM;
+//    Motor_control(spd_L, spd_R);
+    return deltaPWM;
+}
 vw PC_WC_PD(){
     pos_error=0;angle_error=0;
     angle_velocity+=LINE_following();
@@ -123,8 +133,8 @@ void LINE_following_PC() {
     spd_L=0; spd_R=0;
     vw input;
     input =PC_WC_PD();
-    spd_L = 0-input.wc;
-    spd_R = 0+input.wc;
+    spd_L = input.vc-input.wc;
+    spd_R = input.vc+input.wc;
     Motor_control(spd_L, spd_R);
 
 }
@@ -159,16 +169,7 @@ float vc_following() {
     vc = deltaPWM;
     return vc;
 }
-float LINE_following() {
-    float  spd_L, spd_R;
-    error_new = center - Lp;
-    deltaPWM = Kp * error_new + Kd * (error_new - error_old);
-    error_old = error_new;
-//    spd_L = basePWM - deltaPWM;
-//    spd_R = basePWM + deltaPWM;
-//    Motor_control(spd_L, spd_R);
-    return deltaPWM;
-}
+
 void LINE_following_VC() {
     float spd_L, spd_R, vc, deltaPWM;
     vc = vc_following();
