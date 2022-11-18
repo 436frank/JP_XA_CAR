@@ -10,7 +10,7 @@
 
 #define all_white_val_max 1500
 #define all_black_val_min 1500
-#define not_judge_of_pos_range 50 //              50mm *  32/(22.7*PI())  =2872 pos
+#define not_judge_of_pos_range 30 //              50mm *  32/(22.7*PI())  =2872 pos
 //#define not_judge_of_pos_range 2872 //              50mm *  32/(22.7*PI())*128  =2872 pos
 #define stop_pos_range 44.875 //              100mm *  32/(22.7*PI())  =5744 pos
 //#define stop_pos_range 5744 //              100mm *  32/(22.7*PI())*128  =5744 pos
@@ -96,13 +96,13 @@ void check_point()
     if(IRsensors[1]>1500 && IRsensors[2]>1500 && IRsensors[3]>1500 && IRsensors[4]>1500 && IRsensors[5]>1500) //IR1~5 = HIGH  上鎖
     {
         point_cross_flag=1;
-        pos_judge_cross= pos_now+not_judge_of_pos_range;  //所住的位置+上一段距離(POS)
+        pos_judge_cross= posFeedBack+not_judge_of_pos_range;  //所住的位置+上一段距離(POS)
         //tone(2,523,100);
     }
     if(point_cross_flag==1) //確認十字是否鎖上
     {
 
-        if(pos_now < pos_judge_cross)//還沒離開範圍就鎖住左右IR
+        if(posFeedBack < pos_judge_cross)//還沒離開範圍就鎖住左右IR
         {
             point_STOP_or_Hint_flag=0;
         }
@@ -115,7 +115,7 @@ void check_point()
     if(point_STOP_or_Hint_flag==1) //左右IR沒上鎖就
     {
         if(IRsensors[6]>2800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
-        if(IRsensors[0]>2800){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
+        if(IRsensors[0]>2500){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
 
         if(old_stop_point_state > stop_point_state)//下緣觸發 右邊 起終點 1變0
         {

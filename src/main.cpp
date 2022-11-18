@@ -23,12 +23,17 @@ void setup()
 }
 void loop()
 {
+//        for (int i = 0; i < 7; ++i) {
+//        SerialUSB.print(IRsensors[i]);
+//        SerialUSB.print(i==6?'\n':'\t');
+//    }
     /** MENU **/
     StateMachine_to_loop(sButton);
 }
 /** TC3 Interrupt Service Routine **/
 void TC3_Handler()
 {
+//    check_point();
     checkButton();
     READ_QEI();
     read_MPU6500_Acc_Gyro();
