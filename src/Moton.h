@@ -29,8 +29,17 @@ typedef struct vc_wc{
 float spd_L, spd_R;
 float pos_error=0,angle_error=0;
 char vc_f=1;
+/** Pc-PD **/
+float vc_command =0;//0.8*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
+//float vc_kp_=240,vc_kv=9339,wc_kp=2.9,wc_kv=97.2; wn 0.0045
+float Pc_kp=74.3,Pc_kd=4580.6;
+float wc_kp=2.2  ,wc_kd=21.4;
+bool run_flag=0;
+char run_mod_flag=0;
 float vc_kp = 200, vc_ki = 11, vc_kd = 0; //VC_PI
-float Kp=0.01, Kd=1, basePWM =0 ;     //LINE_PD
+float Kp=0.02, Kd=2.2, basePWM =0 ;     //LINE_PD   1.5m/s not ok
+//float Kp=0.02, Kd=2.3, basePWM =0 ;     //LINE_PD   1m/s  ok
+//float Kp=0.01, Kd=1, basePWM =0 ;     //LINE_PD   0.5m/s ok
 //int Kp=40, Kd=300, basePWM =600 ; //LINE_PD
 float deltaPWM=0;
 float angle_velocity=0;
@@ -45,6 +54,7 @@ extern volatile float old_angleFeedBack;
 extern volatile float pos_error_old;
 extern volatile float angle_error_old;
 
+
 void Motor_control(int speed_L, int speed_R);
 void MotorRest();
 void vc_Command(char mod);
@@ -54,14 +64,8 @@ void LINE_following_VC();
 void LINE_following_PC();
 void Calculate_road();
 int Calculate_Acc_dec_distance(float V1);
-vw PC_PD();
-/** Pc-PD **/
-float vc_command =0.5*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
-//float vc_kp_=240,vc_kv=9339,wc_kp=2.9,wc_kv=97.2; wn 0.0045
-float Pc_kp=74.3,Pc_kd=4580.6;
-float wc_kp=2.2  ,wc_kd=21.4;
-bool run_flag=0;
-char run_mod_flag=0;
+vw PC_WC_PD();
+
 /**()**/
 void Motor_control(int speed_L, int speed_R) {
     // Left motor
@@ -197,6 +201,17 @@ void Calculate_road() {
         all_road_distance_mm[i] = all_road_distance[i] * p2mm;
         all_road_radius[i] = abs((all_road_distance_mm[i] / 10) / ((all_PROMPT_w[i] - all_PROMPT_w[i - 1]) * p2r));
         if (all_road_radius[i] > 999)all_road_radius[i] = 999;
+
+        if((all_road_radius[i]>=400)&&(all_road_distance_mm[i]>100))
+        {
+            all_road_speed_max[i]=1*mm2p;
+        }
+        else
+        {
+            all_road_speed_max[i]=0.5*mm2p;
+        }
+
+        if()
     }
 }
 int Calculate_Acc_dec_distance(float V1)

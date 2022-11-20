@@ -19,31 +19,32 @@
 int time_out=0;
 bool Protect_flag=0;
 extern void clearAll();
+extern void clearAll_();
 /**record line DATA Parameters**/
 unsigned long NOW_Time;//ms
 unsigned long old_time;//ms
 //char check_point =0;
 int prompt_cont=0;
-float all_PROMPT[200];          //當前左右輪差pos    左-右
-float all_PROMPT_w[200];        //當前車中心位置pos  (左+右)/2
-float all_road_distance[200];   //道路距離 pos
-float all_road_distance_mm[200];//道路距離 mm
-float all_road_radius[200];     //半徑
-float all_road_speed_max[200];     //半徑
+float all_PROMPT[500];          //當前左右輪差pos    左-右
+float all_PROMPT_w[500];        //當前車中心位置pos  (左+右)/2
+float all_road_distance[500];   //道路距離 pos
+float all_road_distance_mm[500];//道路距離 mm
+float all_road_radius[500];     //半徑
+float all_road_speed_max[500];     //線段最高的目標速度
+float all_road_speed_[500];        //線段進入前的目標速度
 
 char test_1m_flag=0;
-
 float test_1_pwm_r[1000];
 float test_1_pwm_l[1000];
-float test_1_v[2000];
-float test_1_cmd[2000];
+float test_1_v[1000];
+float test_1_cmd[1000];
 
 int test_1m_cont=0;
 uint8_t vc_flag_=0;
 
 int tcont=0;
 
-uint8_t pcontRL_en=0;
+
 void Protect();
 void check_point();
 /**  Calculate Acc dec distance Parameters **/
@@ -76,8 +77,7 @@ void Protect()
         time_out++;
         if(time_out>time_out_max)
         {
-            LINE_flag=0;
-            sButton=0;
+            clearAll();
         }
     }
     else
@@ -133,11 +133,8 @@ void check_point()
             if(stop_point_cont==1)
             {
                 all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
-                all_PROMPT[prompt_cont]=(Pcount_R+Pcount_L)/2;
+                all_PROMPT[prompt_cont]=posFeedBack;
                 prompt_cont++;
-                pcontRL_en=1;
-//                test_1m_flag=1;
-
             }
             tone(Buzzer_PIN,1318,200);
         }
@@ -148,7 +145,7 @@ void check_point()
                 hint_point_buzz_state=1;
                 tone(Buzzer_PIN,1318,200);
                 all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
-                all_PROMPT[prompt_cont]=(Pcount_R+Pcount_L)/2;
+                all_PROMPT[prompt_cont]=posFeedBack;
                 prompt_cont++;
 
             }
@@ -157,7 +154,7 @@ void check_point()
                 hint_point_buzz_state=0;
                 tone(Buzzer_PIN,587,100);
                 all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
-                all_PROMPT[prompt_cont]=(Pcount_R+Pcount_L)/2;
+                all_PROMPT[prompt_cont]=posFeedBack;
                 prompt_cont++;
             }
         }

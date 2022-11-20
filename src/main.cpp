@@ -23,6 +23,7 @@ void setup()
 }
 void loop()
 {
+//    readAllIR_flag =1;
 //        for (int i = 0; i < 7; ++i) {
 //        SerialUSB.print(IRsensors[i]);
 //        SerialUSB.print(i==6?'\n':'\t');
@@ -54,6 +55,7 @@ void TC3_Handler()
 
     }
     if (LINE_following_PC_flag == 1) {
+        readAllIR_values();
         IR_calibrations();
         check_point();
         vc_Command(2);
@@ -72,6 +74,11 @@ void TC3_Handler()
         IR_Max_Min();
     }
     if (run_flag == 1) {
+        readAllIR_values();
+        Protect();
+        IR_calibrations();
+        check_point();
+        Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
         switch (run_mod_flag) {
             case 1:
                 vc_Command(1);

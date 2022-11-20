@@ -165,29 +165,80 @@ void StateMachine(unsigned char value) {
 #endif
 /**  new_menu  **/
 void clearAll();
-void clear_();
+void clearAll_();
 void Selector_QEI();
 void Selector_Observer();
 void StateMachine_to_loop(unsigned char value);
 #ifdef new_menu
+//void clearAll() {
+//    start_flag = 0;
+//    IR_MAX_MIN_value_flag = 0;
+//    start_cont = 0;
+//    MotorRest();
+//    sButton = 0;
+//    Pcount_R = 0;
+//    Pcount_L = 0;
+//    count_L = 0;
+//    count_R = 0;
+//}
 void clearAll() {
+    run_flag = 0;
+    vc_command=0;
+
     start_flag = 0;
     IR_MAX_MIN_value_flag = 0;
-    start_cont = 0;
+    readAllIR_flag = 0;
+    LINE_following_PC_flag = 0;
+    LINE_flag=0;
     MotorRest();
-    sButton = 0;
+    start_cont = 0;
+    error_old=0;
+    error_new=0;
+    pos_error_old=0;
+    angle_error_old=0;
+    pos_error=0;
+    deltaPWM=0;
+    angle_velocity=0;
+    vc_integral = 0;
+    angle_error=0;
+    posFeedBack=0;
+    angleFeedBack=0;
+    Speed_integral=0;
+    Speed_cmd_integral=0;
     Pcount_R = 0;
     Pcount_L = 0;
     count_L = 0;
     count_R = 0;
+    sButton=0;
 }
-void clear_() {
+void clearAll_() {
+    run_flag = 0;
+    vc_command=0;
+
+    start_flag = 0;
+    IR_MAX_MIN_value_flag = 0;
+    readAllIR_flag = 0;
+    LINE_following_PC_flag = 0;
+    LINE_flag=0;
+    MotorRest();
+    start_cont = 0;
+    error_old=0;
+    error_new=0;
+    pos_error_old=0;
+    angle_error_old=0;
+    pos_error=0;
+    deltaPWM=0;
+    angle_velocity=0;
+    vc_integral = 0;
+    angle_error=0;
+    posFeedBack=0;
+    angleFeedBack=0;
+    Speed_integral=0;
+    Speed_cmd_integral=0;
     Pcount_R = 0;
     Pcount_L = 0;
     count_L = 0;
     count_R = 0;
-
-
 }
 void Selector_QEI() {
     if (eMotionL.pNEW < 20) {
@@ -358,6 +409,7 @@ void Selector_Observer() {
             tone(Buzzer_PIN, 800, 200);
             digitalWrite(LED_L_PIN, ON);
             digitalWrite(LED_R_PIN, OFF);
+            clearAll();
             old_enter = 1;
         }
     } //確認
@@ -367,9 +419,6 @@ void StateMachine_to_loop(unsigned char value)
     switch (value)
     {
         case 0:  //選擇模式
-            readAllIR_flag = 0;
-            LINE_following_PC_flag = 0;
-            LINE_flag=0;
             MotorRest();
             Selector_Observer();
             break;
@@ -383,12 +432,12 @@ void StateMachine_to_loop(unsigned char value)
             break;
         case 2: //搜尋
             if(mpu6500_set_flag==1){
+                clearAll_();
+                vc_command=0.8*mm2p;
                 delay(200);
-                clear_();
                 mpu6500AutoOffset(1000, 100);
                 mpu6500_set_flag=0;
             }
-            readAllIR_flag = 1;
             LINE_following_PC_flag = 1;
             break;
         case 3:
@@ -419,22 +468,33 @@ void StateMachine_to_loop(unsigned char value)
             clearAll();
             break;
         case 5:
+            Calculate_road();
+            for (int i = 0; i < prompt_cont; ++i) {
+                SerialUSB.print(all_PROMPT_w[i]);
+                SerialUSB.print("\t");
+                SerialUSB.print(all_road_distance[i]);
+                SerialUSB.print("\t");
+                SerialUSB.print(all_road_radius[i]);
+                SerialUSB.print("\n");
+            }
+            clearAll();
             break;
         case 6:
-            clear_();
+            clearAll_();
             delay(1000);
             mpu6500AutoOffset(1000, 100);
             tone(Buzzer_PIN, 500, 100);
+//            LINE_following_PC_flag=1;
             run_flag = 1;
-            test_1m_flag = 1;//抓數據 旗標
-            run_mod_flag = 1;
-            delay(100);
-            run_mod_flag = 2;
-            delay(200);
-            run_mod_flag = 3;
-            delay(200);
+//            test_1m_flag = 1;//抓數據 旗標
+
+            for (int i = 0; i < prompt_cont; ++i) {
+                if (velFeedBack<all_road_speed_max[i]){run_mod_flag=1;}
+
+//            run_flag = 0;
+//            test_1m_flag = 0;//關閉 抓數據旗標
+            }
             run_flag = 0;
-            test_1m_flag = 0;//關閉 抓數據旗標
             clearAll();
             break;
     }
