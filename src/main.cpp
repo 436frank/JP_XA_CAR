@@ -28,6 +28,7 @@ void loop()
 //        SerialUSB.print(IRsensors[i]);
 //        SerialUSB.print(i==6?'\n':'\t');
 //    }
+//    delay(10);
     /** MENU **/
     StateMachine_to_loop(sButton);
 }
@@ -51,15 +52,23 @@ void TC3_Handler()
     }
     if (readAllIR_flag == 1) {
         readAllIR_values();
-        check_point();
-
     }
     if (LINE_following_PC_flag == 1) {
         readAllIR_values();
         IR_calibrations();
         check_point();
-        vc_Command(2);
         Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
+        switch (run_mod_flag) {
+            case 1:
+                vc_Command(1);
+                break;
+            case 2:
+                vc_Command(2);
+                break;
+            case 3:
+                vc_Command(3);
+                break;
+        }
         LINE_following_PC();
         Protect();
     }
@@ -75,9 +84,9 @@ void TC3_Handler()
     }
     if (run_flag == 1) {
         readAllIR_values();
-        Protect();
         IR_calibrations();
         check_point();
+        Protect();
         Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
         switch (run_mod_flag) {
             case 1:

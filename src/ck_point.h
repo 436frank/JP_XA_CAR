@@ -8,15 +8,14 @@
 
 #include <Arduino.h>
 
-#define all_white_val_max 1500
+#define all_white_val_max 1900
 #define all_black_val_min 1500
-#define not_judge_of_pos_range 30 //              50mm *  32/(22.7*PI())  =2872 pos
-//#define not_judge_of_pos_range 2872 //              50mm *  32/(22.7*PI())*128  =2872 pos
-#define stop_pos_range 44.875 //              100mm *  32/(22.7*PI())  =5744 pos
-//#define stop_pos_range 5744 //              100mm *  32/(22.7*PI())*128  =5744 pos
-#define not_judge_of_pos_range_hint 6.734 //              15mm *  32/(22.7*PI())*128  =862pos
+#define not_judge_of_pos_range 28 //      20pos=5cm
+#define pos_1cm_range 4.1 //              1cm
+
 #define time_out_max 200 // 1ms *300 =300ms
 int time_out=0;
+float old_pos=0;
 bool Protect_flag=0;
 extern void clearAll();
 extern void clearAll_();
@@ -24,14 +23,19 @@ extern void clearAll_();
 unsigned long NOW_Time;//ms
 unsigned long old_time;//ms
 //char check_point =0;
+bool record_data_flag=0;
 int prompt_cont=0;
-float all_PROMPT[500];          //當前左右輪差pos    左-右
-float all_PROMPT_w[500];        //當前車中心位置pos  (左+右)/2
-float all_road_distance[500];   //道路距離 pos
-float all_road_distance_mm[500];//道路距離 mm
-float all_road_radius[500];     //半徑
-float all_road_speed_max[500];     //線段最高的目標速度
-float all_road_speed_[500];        //線段進入前的目標速度
+float all_PROMPT[200];          //當前左右輪差pos    左-右
+float all_PROMPT_w[200];        //當前車中心位置pos  (左+右)/2
+float all_road_distance[200];   //道路距離 pos
+float all_road_distance_mm[200];//道路距離 mm
+float all_road_radius[200];     //半徑
+float all_road_speed_max[200];     //線段最高的目標速度
+float all_road_add_subtract_distance[200];   //線段加減距離
+float all_road_Isokinetic_distance[200];     //線段等速距離
+extern int sprint_cnt;
+extern bool run_flag;
+extern int distance_flag;
 
 char test_1m_flag=0;
 float test_1_pwm_r[1000];
@@ -41,6 +45,7 @@ float test_1_cmd[1000];
 
 int test_1m_cont=0;
 uint8_t vc_flag_=0;
+uint8_t end_flag=0;
 
 int tcont=0;
 
@@ -48,7 +53,7 @@ int tcont=0;
 void Protect();
 void check_point();
 /**  Calculate Acc dec distance Parameters **/
-int Calculate_Acc_dec_distance();
+float Calculate_Acc_dec_distance();
 /**  to check_point Parameters  **/
 int park_well_cont=0;
 uint8_t point_cross_flag=0 ;        //preset = 0
@@ -59,6 +64,9 @@ uint8_t old_stop_point_state=0; //起終點過去狀態
 uint8_t hint_point_state=0;     //提示符號現在狀態
 uint8_t old_hint_point_state=0; //提示符號過去狀態
 uint8_t hint_point_buzz_state=0;
+
+uint8_t hint_point_LED_state=0;
+uint8_t hint_point_LED_state_cnt=0;
 float pos_judge_cross=0;//十字鎖住的範圍
 float pos_stop=0;//停車跑一段的範圍
 /**  to check_point Parameters_END  **/
@@ -119,48 +127,79 @@ void check_point()
 
         if(old_stop_point_state > stop_point_state)//下緣觸發 右邊 起終點 1變0
         {
+
             stop_point_cont++;
             if(stop_point_cont==2) {
 //                pos_stop=pos_now+stop_pos_range;
-                sButton = 0;
                 stop_point_cont = 0;
-                all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
-                all_PROMPT[prompt_cont]=(Pcount_R+Pcount_L)/2;
-                prompt_cont++;
-                clearAll();
+                if (record_data_flag==1) {
+                    all_PROMPT_w[prompt_cont] = Pcount_R - Pcount_L;
+                    all_PROMPT[prompt_cont] = posFeedBack;
+                }
+                record_data_flag=0;
+                run_flag = 0;
+                end_flag=1;
 
             }
             if(stop_point_cont==1)
             {
-                all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
-                all_PROMPT[prompt_cont]=posFeedBack;
-                prompt_cont++;
+
+                if (record_data_flag==1) {
+                    all_PROMPT_w[prompt_cont] = Pcount_R - Pcount_L;
+                    all_PROMPT[prompt_cont] = posFeedBack;
+                    prompt_cont++;
+                }
+
             }
             tone(Buzzer_PIN,1318,200);
+            digitalWrite(LED_R_PIN,ON);
+            hint_point_LED_state=1;
+            sprint_cnt++;
+            distance_flag=1;
         }
         if(old_hint_point_state > hint_point_state)//下緣觸發 左邊 路段提示 1變0
         {
-            if(hint_point_buzz_state==0)
-            {
-                hint_point_buzz_state=1;
-                tone(Buzzer_PIN,1318,200);
-                all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
-                all_PROMPT[prompt_cont]=posFeedBack;
-                prompt_cont++;
+            if ((posFeedBack - old_pos) > pos_1cm_range) {
+                if (hint_point_buzz_state == 0) {
+                    hint_point_buzz_state = 1;
+                    tone(Buzzer_PIN, 1318, 200);
+                    if (record_data_flag == 1) {
+                        all_PROMPT_w[prompt_cont] = Pcount_R - Pcount_L;
+                        all_PROMPT[prompt_cont] = posFeedBack;
+                        prompt_cont++;
+                    }
 
-            }
-            else
-            {
-                hint_point_buzz_state=0;
-                tone(Buzzer_PIN,587,100);
-                all_PROMPT_w[prompt_cont]=Pcount_R-Pcount_L;
-                all_PROMPT[prompt_cont]=posFeedBack;
-                prompt_cont++;
+                    sprint_cnt++;
+                } else {
+                    hint_point_buzz_state = 0;
+                    tone(Buzzer_PIN, 587, 100);
+                    if (record_data_flag == 1) {
+                        all_PROMPT_w[prompt_cont] = Pcount_R - Pcount_L;
+                        all_PROMPT[prompt_cont] = posFeedBack;
+                        prompt_cont++;
+                    }
+
+                    sprint_cnt++;
+                }
+                digitalWrite(LED_L_PIN, ON);
+                hint_point_LED_state = 1;
+                distance_flag=1;
+                old_pos=posFeedBack;
             }
         }
         old_hint_point_state=hint_point_state;
         old_stop_point_state=stop_point_state;
     }
-
+    if(hint_point_LED_state==1)
+    {
+        hint_point_LED_state_cnt++;
+        if(hint_point_LED_state_cnt==3)
+        {
+            digitalWrite(LED_L_PIN,OFF);
+            digitalWrite(LED_R_PIN,OFF);
+            hint_point_LED_state=0;
+            hint_point_LED_state_cnt=0;
+        }
+    }
 }
 /* check_point_END*/

@@ -11,6 +11,13 @@
 #define new_menu
 /**  variable  **/
 extern float Speed_cmd_integral;
+int sprint_cnt=0;
+int distance_flag=0;
+float distance=0;
+int Notice_subtract_distance_flag=0;
+
+int old_sprint_cnt=0;
+
 
 
 /**  old_menu  **/
@@ -170,20 +177,19 @@ void Selector_QEI();
 void Selector_Observer();
 void StateMachine_to_loop(unsigned char value);
 #ifdef new_menu
-//void clearAll() {
-//    start_flag = 0;
-//    IR_MAX_MIN_value_flag = 0;
-//    start_cont = 0;
-//    MotorRest();
-//    sButton = 0;
-//    Pcount_R = 0;
-//    Pcount_L = 0;
-//    count_L = 0;
-//    count_R = 0;
-//}
+
 void clearAll() {
+    end_flag=0;
+    distance_flag=0;
+    distance=0;
+    Notice_subtract_distance_flag=0;
     run_flag = 0;
     vc_command=0;
+    sprint_cnt=0;
+    old_pos=0;
+    old_sprint_cnt=0;
+    record_data_flag=0;
+    run_mod_flag=0;
 
     start_flag = 0;
     IR_MAX_MIN_value_flag = 0;
@@ -214,6 +220,14 @@ void clearAll() {
 void clearAll_() {
     run_flag = 0;
     vc_command=0;
+    sprint_cnt=0;
+    old_pos=0;
+    old_sprint_cnt=0;
+    end_flag=0;
+    distance_flag=0;
+    distance=0;
+    Notice_subtract_distance_flag=0;
+    run_mod_flag=0;
 
     start_flag = 0;
     IR_MAX_MIN_value_flag = 0;
@@ -431,14 +445,25 @@ void StateMachine_to_loop(unsigned char value)
             clearAll();
             break;
         case 2: //搜尋
+            record_data_flag=1;
             if(mpu6500_set_flag==1){
                 clearAll_();
-                vc_command=0.8*mm2p;
                 delay(200);
                 mpu6500AutoOffset(1000, 100);
                 mpu6500_set_flag=0;
             }
+            if(vc_command<1.1*mm2p) {
+                run_mod_flag = 1;
+
+            } else{
+                run_mod_flag = 2;
+                vc_command = 1.1*mm2p;
+            }
             LINE_following_PC_flag = 1;
+            if(end_flag==1){
+            delay(200);
+            clearAll();
+            }
             break;
         case 3:
             delay(1000);
@@ -470,33 +495,66 @@ void StateMachine_to_loop(unsigned char value)
         case 5:
             Calculate_road();
             for (int i = 0; i < prompt_cont; ++i) {
-                SerialUSB.print(all_PROMPT_w[i]);
-                SerialUSB.print("\t");
                 SerialUSB.print(all_road_distance[i]);
                 SerialUSB.print("\t");
                 SerialUSB.print(all_road_radius[i]);
+                SerialUSB.print("\t");
+                SerialUSB.print(all_road_speed_max[i]);
+                SerialUSB.print("\t");
+                SerialUSB.print(all_PROMPT[i]);
                 SerialUSB.print("\n");
             }
             clearAll();
             break;
         case 6:
-            clearAll_();
-            delay(1000);
-            mpu6500AutoOffset(1000, 100);
-            tone(Buzzer_PIN, 500, 100);
-//            LINE_following_PC_flag=1;
-            run_flag = 1;
-//            test_1m_flag = 1;//抓數據 旗標
-
-            for (int i = 0; i < prompt_cont; ++i) {
-                if (velFeedBack<all_road_speed_max[i]){run_mod_flag=1;}
-
-//            run_flag = 0;
-//            test_1m_flag = 0;//關閉 抓數據旗標
+            if(mpu6500_set_flag==1){
+                clearAll_();
+                delay(200);
+                mpu6500AutoOffset(1000, 100);
+                mpu6500_set_flag=0;
+                run_flag = 1;
             }
-            run_flag = 0;
-            clearAll();
+            if(run_flag==1)
+            {
+                if(old_sprint_cnt==0){
+                    if (vc_command < all_road_speed_max[sprint_cnt]) {
+                        run_mod_flag = 1;
+                    } else{run_mod_flag = 2;}
+                }
+                if(distance_flag==1)
+                {
+                distance+=all_road_distance[sprint_cnt];
+                distance_flag=0;
+                }
+                if(old_sprint_cnt!=sprint_cnt){
+                    if (vc_command == all_road_speed_max[sprint_cnt]) {
+                        run_mod_flag = 2;
+                        old_sprint_cnt = sprint_cnt;
+                        Notice_subtract_distance_flag=1;
+                    }
+                    else if(vc_command>all_road_speed_max[sprint_cnt]){
+                        run_mod_flag = 3;
+                    }
+                    else if(vc_command<all_road_speed_max[sprint_cnt]){
+                        run_mod_flag = 1;
+                    }
+                }
+                if(Notice_subtract_distance_flag==1)
+                {
+                    if(posFeedBack>=(distance-Calculate_Acc_dec_distance()))
+                    {
+                        run_mod_flag = 3;
+                        Notice_subtract_distance_flag=0;
+                    }
+
+                }
+            }
+            if(end_flag==1){
+                delay(200);
+                clearAll();
+            }
             break;
+
     }
 }
 #endif

@@ -13,8 +13,8 @@
 #define wheel_diameter          24.85f                // 輪直徑(mm)
 #define wheel_pulses            8                    // (pulses)
 #define encoder_resolution      (wheel_pulses * 4)   // (pulses/r)
-//#define acceleration            0.01f              // 加速度 10m/s
-#define acceleration            0.005f              // 加速度 5m/s
+#define acceleration            0.01f              // 加速度 10m/s
+//#define acceleration            0.005f              // 加速度 5m/s
 #define CAR_WIDE                100.0f               // 車寬(mm)
 const float mm2p = (encoder_resolution / (wheel_diameter * PI)); // 1 mm    ~= 0.449893 pulse
 const float p2mm = ((wheel_diameter * PI) / encoder_resolution); // 1 pulse ~=  2.227437mm   直徑 x 圓周率=圓周長   圓周長/encoder解析度 = 1個dpi 移動多少
@@ -34,17 +34,22 @@ float vc_command =0;//0.8*mm2p;//; //2*mm2p  // MAX  OR  等速1.8m/s
 //float vc_kp_=240,vc_kv=9339,wc_kp=2.9,wc_kv=97.2; wn 0.0045
 float Pc_kp=74.3,Pc_kd=4580.6;
 float wc_kp=2.2  ,wc_kd=21.4;
-bool run_flag=0;
-char run_mod_flag=0;
-float vc_kp = 200, vc_ki = 11, vc_kd = 0; //VC_PI
-float Kp=0.02, Kd=2.2, basePWM =0 ;     //LINE_PD   1.5m/s not ok
+float Kp=0.0292, Kd=4.865, basePWM =0 ;     //LINE_PD   1.3m/s  ok
+//float Kp=0.027, Kd=3.99, basePWM =0 ;     //LINE_PD   1.2m/s  ok
+//float Kp=0.025, Kd=3, basePWM =0 ;     //LINE_PD   1.1m/s  ok
 //float Kp=0.02, Kd=2.3, basePWM =0 ;     //LINE_PD   1m/s  ok
 //float Kp=0.01, Kd=1, basePWM =0 ;     //LINE_PD   0.5m/s ok
 //int Kp=40, Kd=300, basePWM =600 ; //LINE_PD
+bool run_flag=0;
+char run_mod_flag=0;
+
+
 float deltaPWM=0;
 float angle_velocity=0;
 int error_new, error_old;
 float vc_error_new, vc_error_old, vc_integral = 0;
+float vc_kp = 200, vc_ki = 11, vc_kd = 0; //VC_PI
+
 float Speed_integral=0;
 float Speed_cmd_integral=0;
 extern volatile float angleFeedBack;
@@ -53,6 +58,7 @@ extern volatile float old_posFeedBack;
 extern volatile float old_angleFeedBack;
 extern volatile float pos_error_old;
 extern volatile float angle_error_old;
+
 
 
 void Motor_control(int speed_L, int speed_R);
@@ -185,6 +191,15 @@ void LINE_following_VC() {
     Motor_control(spd_L, spd_R);
 
 }
+void LINE_following_not_moving() {
+    int spd_L, spd_R, b_pwm = 0, deltaPWM;
+    error_new = center - Lp;
+    deltaPWM = 40 * error_new + 300 * (error_new - error_old);
+    error_old = error_new;
+    spd_L = b_pwm - deltaPWM;
+    spd_R = b_pwm + deltaPWM;
+    Motor_control(spd_L, spd_R);
+}
 void LINE_following_park_well() {
     int spd_L, spd_R, b_pwm = 1000, deltaPWM;
     error_new = center - Lp;
@@ -197,26 +212,25 @@ void LINE_following_park_well() {
 }
 void Calculate_road() {
     for (int i = prompt_cont; i > 0; --i) {
-        all_road_distance[i] = all_PROMPT[i] - all_PROMPT[i - 1];
-        all_road_distance_mm[i] = all_road_distance[i] * p2mm;
-        all_road_radius[i] = abs((all_road_distance_mm[i] / 10) / ((all_PROMPT_w[i] - all_PROMPT_w[i - 1]) * p2r));
-        if (all_road_radius[i] > 999)all_road_radius[i] = 999;
-
-        if((all_road_radius[i]>=400)&&(all_road_distance_mm[i]>100))
+        all_road_distance[i] = all_PROMPT[i] - all_PROMPT[i - 1];//線段距離 單位pos
+        all_road_distance_mm[i] = all_road_distance[i] * p2mm;//線段距離 單位mm
+        all_road_radius[i] = abs(
+                (all_road_distance_mm[i] / 10) / ((all_PROMPT_w[i] - all_PROMPT_w[i - 1]) * p2r));//估測角度
+        if (all_road_radius[i] > 999)all_road_radius[i] = 999;//估測出的線段半徑所上限999
+        if ((all_road_radius[i] >= 300) && (all_road_distance_mm[i] > 100))//半徑大於300 且現段長度超過10cm 配速1m/s
         {
-            all_road_speed_max[i]=1*mm2p;
-        }
-        else
+            all_road_speed_max[i] = 1.1 * mm2p;
+        } else //否則配速0.5m/s
         {
-            all_road_speed_max[i]=0.5*mm2p;
+            all_road_speed_max[i] = 0.5 * mm2p;
         }
-
-        if()
     }
+    all_road_speed_max[0]=1*mm2p;
+    all_road_speed_max[prompt_cont+1]=0.5*mm2p;
 }
-int Calculate_Acc_dec_distance(float V1)
+float Calculate_Acc_dec_distance()
 {
-    int result=0;
-    result = (float)((vc_command*vc_command)-(velocity*velocity))/(2*acceleration );
+    float result=0;
+    result = (float)((vc_command*vc_command)-(all_road_speed_max[sprint_cnt+1]*all_road_speed_max[sprint_cnt+1]))/(2*acceleration_p );
     return result;
 }
