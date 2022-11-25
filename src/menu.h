@@ -190,6 +190,7 @@ void clearAll() {
     old_sprint_cnt=0;
     record_data_flag=0;
     run_mod_flag=0;
+    before_starting_pos=0;
 
     start_flag = 0;
     IR_MAX_MIN_value_flag = 0;
@@ -527,27 +528,33 @@ void StateMachine_to_loop(unsigned char value)
                 distance_flag=0;
                 }
                 if(old_sprint_cnt!=sprint_cnt){
-                    if (vc_command == all_road_speed_max[sprint_cnt]) {
-                        run_mod_flag = 2;
-                        old_sprint_cnt = sprint_cnt;
-                        Notice_subtract_distance_flag=1;
-                    }
-                    else if(vc_command>all_road_speed_max[sprint_cnt]){
-                        run_mod_flag = 3;
-                    }
-                    else if(vc_command<all_road_speed_max[sprint_cnt]){
-                        run_mod_flag = 1;
-                    }
-                }
-                if(Notice_subtract_distance_flag==1)
-                {
-                    if(posFeedBack>=(distance-Calculate_Acc_dec_distance()))
+                    if((posFeedBack-before_starting_pos)>=(distance-Calculate_Acc_dec_distance()))
                     {
-                        run_mod_flag = 3;
-                        Notice_subtract_distance_flag=0;
-                    }
+                        if (vc_command > all_road_speed_max[sprint_cnt+1])
+                        {
+                            run_mod_flag = 3;
+                        }
+                        else
+                        {
+                            run_mod_flag = 2;
+                        }
 
+                    }
+                    else
+                    {
+                        if (vc_command == all_road_speed_max[sprint_cnt]) {
+                            run_mod_flag = 2;
+                            old_sprint_cnt = sprint_cnt;
+                            Notice_subtract_distance_flag = 1;
+                        } else if (vc_command > all_road_speed_max[sprint_cnt]) {
+                            run_mod_flag = 3;
+                        } else if (vc_command < all_road_speed_max[sprint_cnt]) {
+                            run_mod_flag = 1;
+                        }
+                    }
                 }
+
+
             }
             if(end_flag==1){
                 delay(200);

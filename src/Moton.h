@@ -225,8 +225,8 @@ void Calculate_road() {
             all_road_speed_max[i] = 0.5 * mm2p;
         }
     }
-    all_road_speed_max[0]=1*mm2p;
-    all_road_speed_max[prompt_cont+1]=0.5*mm2p;
+    all_road_speed_max[0]=2*mm2p;
+    all_road_speed_max[prompt_cont+1]=1.1*mm2p;
 }
 float Calculate_Acc_dec_distance()
 {

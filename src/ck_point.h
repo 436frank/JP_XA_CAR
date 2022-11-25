@@ -24,6 +24,7 @@ unsigned long NOW_Time;//ms
 unsigned long old_time;//ms
 //char check_point =0;
 bool record_data_flag=0;
+float before_starting_pos;
 int prompt_cont=0;
 float all_PROMPT[200];          //當前左右輪差pos    左-右
 float all_PROMPT_w[200];        //當前車中心位置pos  (左+右)/2
@@ -143,7 +144,7 @@ void check_point()
             }
             if(stop_point_cont==1)
             {
-
+                before_starting_pos=posFeedBack;
                 if (record_data_flag==1) {
                     all_PROMPT_w[prompt_cont] = Pcount_R - Pcount_L;
                     all_PROMPT[prompt_cont] = posFeedBack;
