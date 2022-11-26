@@ -211,22 +211,46 @@ void LINE_following_park_well() {
     Motor_control(spd_L, spd_R);
 }
 void Calculate_road() {
+    for(int i = 0; i < 200; i++) {
+        all_road_speed_max[i] = 1.1*mm2p;
+        all_road_speed_max2[i] = 1.1*mm2p;
+        all_road_speed_max3[i] = 1.1*mm2p;
+    }
     for (int i = prompt_cont; i > 0; --i) {
         all_road_distance[i] = all_PROMPT[i] - all_PROMPT[i - 1];//線段距離 單位pos
         all_road_distance_mm[i] = all_road_distance[i] * p2mm;//線段距離 單位mm
         all_road_radius[i] = abs(
                 (all_road_distance_mm[i] / 10) / ((all_PROMPT_w[i] - all_PROMPT_w[i - 1]) * p2r));//估測角度
         if (all_road_radius[i] > 999)all_road_radius[i] = 999;//估測出的線段半徑所上限999
+        /** SP_MOD 1 **/
         if ((all_road_radius[i] >= 300) && (all_road_distance_mm[i] > 100))//半徑大於300 且現段長度超過10cm 配速1m/s
-        {
-            all_road_speed_max[i] = 1.1 * mm2p;
-        } else //否則配速0.5m/s
-        {
-            all_road_speed_max[i] = 0.5 * mm2p;
-        }
+        {all_road_speed_max[i] = 2 * mm2p;}
+        else{all_road_speed_max[i] = 1.1 * mm2p;}
+        /** SP_MOD 2 **/
+        if ((all_road_radius[i] >= 300) && (all_road_distance_mm[i] > 200))//半徑大於300 且現段長度超過10cm 配速1m/s
+        {all_road_speed_max2[i] = 2.3 * mm2p;}
+        else if((all_road_radius[i]>300)&&(all_road_distance_mm[i] > 100) )
+        {all_road_speed_max2[i] = 1.35 * mm2p;}
+        else if((all_road_radius[i]<=300)&&(all_road_radius[i]>200 ))
+        {all_road_speed_max2[i] = 1.3 * mm2p;}
+        else if((all_road_radius[i]<=200)&&(all_road_radius[i]>=100 ))
+        {all_road_speed_max2[i] = 1.2 * mm2p;}
+        /** SP_MOD 3 **/
+        if ((all_road_radius[i] >= 300) && (all_road_distance_mm[i] > 200))//半徑大於300 且現段長度超過10cm 配速1m/s
+        {all_road_speed_max3[i] = 2.7 * mm2p;}
+        else if((all_road_radius[i]>300)&&(all_road_distance_mm[i] > 100) )
+        {all_road_speed_max3[i] = 1.7 * mm2p;}
+        else if((all_road_radius[i]<=300)&&(all_road_radius[i]>200 ))
+        {all_road_speed_max3[i] = 1.3 * mm2p;}
+        else if((all_road_radius[i]<=200)&&(all_road_radius[i]>=100 ))
+        {all_road_speed_max3[i] = 1.2 * mm2p;}
     }
-    all_road_speed_max[0]=2*mm2p;
+    all_road_speed_max[0]=0.8*mm2p;
+    all_road_speed_max2[0]=0.8*mm2p;
+    all_road_speed_max3[0]=0.8*mm2p;
     all_road_speed_max[prompt_cont+1]=1.1*mm2p;
+    all_road_speed_max2[prompt_cont+1]=1.1*mm2p;
+    all_road_speed_max3[prompt_cont+1]=1.1*mm2p;
 }
 float Calculate_Acc_dec_distance()
 {

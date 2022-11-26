@@ -13,6 +13,7 @@
 #define not_judge_of_pos_range 28 //      20pos=5cm
 #define pos_1cm_range 4.1 //              1cm
 
+
 #define time_out_max 200 // 1ms *300 =300ms
 int time_out=0;
 float old_pos=0;
@@ -24,14 +25,19 @@ unsigned long NOW_Time;//ms
 unsigned long old_time;//ms
 //char check_point =0;
 bool record_data_flag=0;
+bool record_speed_data_flag=0;
+bool before_starting_pos_flag=0;
 float before_starting_pos;
 int prompt_cont=0;
 float all_PROMPT[200];          //當前左右輪差pos    左-右
 float all_PROMPT_w[200];        //當前車中心位置pos  (左+右)/2
+float all_PROMPT_w_speed[200];        //當前車中心位置pos  (左+右)/2
 float all_road_distance[200];   //道路距離 pos
 float all_road_distance_mm[200];//道路距離 mm
 float all_road_radius[200];     //半徑
-float all_road_speed_max[200];     //線段最高的目標速度
+float all_road_speed_max[200];     //線段最高的目標速度 /mod 3
+float all_road_speed_max2[200];     //線段最高的目標速度 /mod 6
+float all_road_speed_max3[200];     //線段最高的目標速度 /mod
 float all_road_add_subtract_distance[200];   //線段加減距離
 float all_road_Isokinetic_distance[200];     //線段等速距離
 extern int sprint_cnt;
@@ -128,8 +134,18 @@ void check_point()
 
         if(old_stop_point_state > stop_point_state)//下緣觸發 右邊 起終點 1變0
         {
-
             stop_point_cont++;
+            if (stop_point_cont > 1)
+            {
+                if (sprint_cnt >= (prompt_cont - 3))
+                {
+                    stop_point_cont=2;
+                }
+                else
+                {
+                    stop_point_cont=1;
+                }
+            }
             if(stop_point_cont==2) {
 //                pos_stop=pos_now+stop_pos_range;
                 stop_point_cont = 0;
@@ -137,18 +153,28 @@ void check_point()
                     all_PROMPT_w[prompt_cont] = Pcount_R - Pcount_L;
                     all_PROMPT[prompt_cont] = posFeedBack;
                 }
+                if (record_speed_data_flag==1) {
+                    all_PROMPT_w_speed[sprint_cnt] = posFeedBack;
+                }
                 record_data_flag=0;
-                run_flag = 0;
+                record_speed_data_flag=0;
                 end_flag=1;
 
             }
             if(stop_point_cont==1)
             {
-                before_starting_pos=posFeedBack;
+                if(before_starting_pos_flag==0)
+                {
+                    before_starting_pos=posFeedBack;
+                    before_starting_pos_flag=1;
+                }
                 if (record_data_flag==1) {
                     all_PROMPT_w[prompt_cont] = Pcount_R - Pcount_L;
                     all_PROMPT[prompt_cont] = posFeedBack;
                     prompt_cont++;
+                }
+                if (record_speed_data_flag==1) {
+                    all_PROMPT_w_speed[sprint_cnt] = posFeedBack;
                 }
 
             }
@@ -169,7 +195,9 @@ void check_point()
                         all_PROMPT[prompt_cont] = posFeedBack;
                         prompt_cont++;
                     }
-
+                    if (record_speed_data_flag==1) {
+                        all_PROMPT_w_speed[sprint_cnt] = posFeedBack;
+                    }
                     sprint_cnt++;
                 } else {
                     hint_point_buzz_state = 0;
@@ -179,7 +207,9 @@ void check_point()
                         all_PROMPT[prompt_cont] = posFeedBack;
                         prompt_cont++;
                     }
-
+                    if (record_speed_data_flag==1) {
+                        all_PROMPT_w_speed[sprint_cnt] = posFeedBack;
+                    }
                     sprint_cnt++;
                 }
                 digitalWrite(LED_L_PIN, ON);

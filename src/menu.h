@@ -191,7 +191,7 @@ void clearAll() {
     record_data_flag=0;
     run_mod_flag=0;
     before_starting_pos=0;
-
+    before_starting_pos_flag=0;
     start_flag = 0;
     IR_MAX_MIN_value_flag = 0;
     readAllIR_flag = 0;
@@ -229,7 +229,7 @@ void clearAll_() {
     distance=0;
     Notice_subtract_distance_flag=0;
     run_mod_flag=0;
-
+    before_starting_pos_flag=0;
     start_flag = 0;
     IR_MAX_MIN_value_flag = 0;
     readAllIR_flag = 0;
@@ -251,6 +251,7 @@ void clearAll_() {
     Speed_integral=0;
     Speed_cmd_integral=0;
     Pcount_R = 0;
+
     Pcount_L = 0;
     count_L = 0;
     count_R = 0;
@@ -467,48 +468,8 @@ void StateMachine_to_loop(unsigned char value)
             }
             break;
         case 3:
-            delay(1000);
-            mpu6500AutoOffset(1000, 100);
-            Motor_control(1100, -1100);
-//            Motor_control(700, -700);
-//            Motor_control(950, -950);
-            test_1m_flag = 1;//抓數據 旗標
-            delay(800);
-            test_1m_flag = 0;//關閉 抓數據旗標
-            clearAll();
-            break;
-        case 4: //抓資料
-            NVIC_DisableIRQ(TC3_IRQn);
-            for (int i = 0; i < test_1m_cont; ++i)
-            {
-                SerialUSB.print(test_1_v[i] * p2mm, 4);
-                SerialUSB.print("\t");
-                SerialUSB.print(test_1_cmd[i] * p2mm, 4);
-                SerialUSB.print("\t");
-                SerialUSB.print(test_1_pwm_r[i] * p2mm, 1);
-                SerialUSB.print("\t");
-                SerialUSB.print(test_1_pwm_l[i] * p2mm, 1);
-                SerialUSB.print("\n");
-            }
-            NVIC_EnableIRQ(TC3_IRQn);
-            clearAll();
-            break;
-        case 5:
-            Calculate_road();
-            for (int i = 0; i < prompt_cont; ++i) {
-                SerialUSB.print(all_road_distance[i]);
-                SerialUSB.print("\t");
-                SerialUSB.print(all_road_radius[i]);
-                SerialUSB.print("\t");
-                SerialUSB.print(all_road_speed_max[i]);
-                SerialUSB.print("\t");
-                SerialUSB.print(all_PROMPT[i]);
-                SerialUSB.print("\n");
-            }
-            clearAll();
-            break;
-        case 6:
             if(mpu6500_set_flag==1){
+                Calculate_road();
                 clearAll_();
                 delay(200);
                 mpu6500AutoOffset(1000, 100);
@@ -517,19 +478,21 @@ void StateMachine_to_loop(unsigned char value)
             }
             if(run_flag==1)
             {
-                if(old_sprint_cnt==0){
+                if(sprint_cnt==0){
                     if (vc_command < all_road_speed_max[sprint_cnt]) {
                         run_mod_flag = 1;
-                    } else{run_mod_flag = 2;}
+                    }
+                    else if(vc_command >= all_road_speed_max[sprint_cnt]){
+                        run_mod_flag = 2;}
+//                    vc_command=all_road_speed_max[sprint_cnt];
                 }
                 if(distance_flag==1)
                 {
-                distance+=all_road_distance[sprint_cnt];
-                distance_flag=0;
+                    distance+=all_road_distance[sprint_cnt];
+                    distance_flag=0;
                 }
                 if(old_sprint_cnt!=sprint_cnt){
-                    if((posFeedBack-before_starting_pos)>=(distance-Calculate_Acc_dec_distance()))
-                    {
+                    if((posFeedBack-before_starting_pos)>=(distance-(Calculate_Acc_dec_distance()*1.2))){
                         if (vc_command > all_road_speed_max[sprint_cnt+1])
                         {
                             run_mod_flag = 3;
@@ -537,6 +500,7 @@ void StateMachine_to_loop(unsigned char value)
                         else
                         {
                             run_mod_flag = 2;
+                            old_sprint_cnt = sprint_cnt;
                         }
 
                     }
@@ -545,7 +509,6 @@ void StateMachine_to_loop(unsigned char value)
                         if (vc_command == all_road_speed_max[sprint_cnt]) {
                             run_mod_flag = 2;
                             old_sprint_cnt = sprint_cnt;
-                            Notice_subtract_distance_flag = 1;
                         } else if (vc_command > all_road_speed_max[sprint_cnt]) {
                             run_mod_flag = 3;
                         } else if (vc_command < all_road_speed_max[sprint_cnt]) {
@@ -557,11 +520,145 @@ void StateMachine_to_loop(unsigned char value)
 
             }
             if(end_flag==1){
+                run_mod_flag = 3;
+                delay(200);
+                run_flag = 0;
+                clearAll();
+            }
+            break;
+        case 4:
+            if(mpu6500_set_flag==1){
+                Calculate_road();
+                clearAll_();
+                delay(200);
+                mpu6500AutoOffset(1000, 100);
+                mpu6500_set_flag=0;
+                run_flag = 1;
+            }
+            if(run_flag==1)
+            {
+                if(sprint_cnt==0){
+                    if (vc_command < all_road_speed_max2[sprint_cnt]) {
+                        run_mod_flag = 1;
+                    }
+                    else if(vc_command >= all_road_speed_max2[sprint_cnt]){
+                        run_mod_flag = 2;}
+//                    vc_command=all_road_speed_max[sprint_cnt];
+                }
+                if(distance_flag==1)
+                {
+                    distance+=all_road_distance[sprint_cnt];
+                    distance_flag=0;
+                }
+                if(old_sprint_cnt!=sprint_cnt){
+                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1.4))){
+                        if (vc_command > all_road_speed_max2[sprint_cnt+1])
+                        {
+                            run_mod_flag = 3;
+                        }
+                        else
+                        {
+                            run_mod_flag = 2;
+                            old_sprint_cnt = sprint_cnt;
+                        }
+                    }
+                    else
+                    {
+                        if (vc_command == all_road_speed_max2[sprint_cnt]) {
+                            run_mod_flag = 2;
+                            old_sprint_cnt = sprint_cnt;
+                        } else if (vc_command > all_road_speed_max2[sprint_cnt]) {
+                            run_mod_flag = 3;
+                        } else if (vc_command < all_road_speed_max2[sprint_cnt]) {
+                            run_mod_flag = 1;
+                        }
+                    }
+                }
+            }
+            if(end_flag==1){
+                run_mod_flag = 3;
+                delay(200);
+                run_flag = 0;
+                clearAll();
+            }
+            break;
+        case 5:
+            if(mpu6500_set_flag==1){
+                Calculate_road();
+                clearAll_();
+                delay(200);
+                mpu6500AutoOffset(1000, 100);
+                mpu6500_set_flag=0;
+                run_flag = 1;
+            }
+            if(run_flag==1)
+            {
+                if(sprint_cnt==0){
+                    if (vc_command < all_road_speed_max3[sprint_cnt]) {
+                        run_mod_flag = 1;
+                    }
+                    else if(vc_command >= all_road_speed_max3[sprint_cnt]){
+                        run_mod_flag = 2;}
+//                    vc_command=all_road_speed_max[sprint_cnt];
+                }
+                if(distance_flag==1)
+                {
+                    distance+=all_road_distance[sprint_cnt];
+                    distance_flag=0;
+                }
+                if(old_sprint_cnt!=sprint_cnt){
+                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1.6))){
+                        if (vc_command > all_road_speed_max3[sprint_cnt+1])
+                        {
+                            run_mod_flag = 3;
+                        }
+                        else
+                        {
+                            run_mod_flag = 2;
+                            old_sprint_cnt = sprint_cnt;
+                        }
+                    }
+                    else
+                    {
+                        if (vc_command == all_road_speed_max3[sprint_cnt]) {
+                            run_mod_flag = 2;
+                            old_sprint_cnt = sprint_cnt;
+                        } else if (vc_command > all_road_speed_max3[sprint_cnt]) {
+                            run_mod_flag = 3;
+                        } else if (vc_command < all_road_speed_max3[sprint_cnt]) {
+                            run_mod_flag = 1;
+                        }
+                    }
+                }
+            }
+            if(end_flag==1){
+                run_mod_flag = 3;
+                delay(200);
+                run_flag = 0;
+                clearAll();
+            }
+            break;
+        case 6://抓資料
+            record_data_flag=1;
+            if(mpu6500_set_flag==1){
+                clearAll_();
+                delay(200);
+                mpu6500AutoOffset(1000, 100);
+                mpu6500_set_flag=0;
+            }
+            if(vc_command<1.3*mm2p) {
+                run_mod_flag = 1;
+
+            } else{
+                run_mod_flag = 2;
+                vc_command = 1.3*mm2p;
+            }
+            LINE_following_PC_flag = 1;
+            if(end_flag==1){
                 delay(200);
                 clearAll();
             }
             break;
-
     }
 }
 #endif
