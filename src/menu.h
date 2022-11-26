@@ -229,6 +229,7 @@ void clearAll_() {
     distance=0;
     Notice_subtract_distance_flag=0;
     run_mod_flag=0;
+    before_starting_pos=0;
     before_starting_pos_flag=0;
     start_flag = 0;
     IR_MAX_MIN_value_flag = 0;
@@ -251,7 +252,6 @@ void clearAll_() {
     Speed_integral=0;
     Speed_cmd_integral=0;
     Pcount_R = 0;
-
     Pcount_L = 0;
     count_L = 0;
     count_R = 0;
@@ -447,13 +447,13 @@ void StateMachine_to_loop(unsigned char value)
             clearAll();
             break;
         case 2: //搜尋
-            record_data_flag=1;
             if(mpu6500_set_flag==1){
                 clearAll_();
                 delay(200);
                 mpu6500AutoOffset(1000, 100);
                 mpu6500_set_flag=0;
             }
+            record_data_flag=1;
             if(vc_command<1.1*mm2p) {
                 run_mod_flag = 1;
 
@@ -551,7 +551,7 @@ void StateMachine_to_loop(unsigned char value)
                     distance_flag=0;
                 }
                 if(old_sprint_cnt!=sprint_cnt){
-                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1.4))){
+                    if((posFeedBack-before_starting_pos)>=(distance-(13.4+Calculate_Acc_dec_distance()*1.4))){
                         if (vc_command > all_road_speed_max2[sprint_cnt+1])
                         {
                             run_mod_flag = 3;
@@ -639,13 +639,13 @@ void StateMachine_to_loop(unsigned char value)
             }
             break;
         case 6://抓資料
-            record_data_flag=1;
             if(mpu6500_set_flag==1){
                 clearAll_();
                 delay(200);
                 mpu6500AutoOffset(1000, 100);
                 mpu6500_set_flag=0;
             }
+            record_data_flag=1;
             if(vc_command<1.3*mm2p) {
                 run_mod_flag = 1;
 

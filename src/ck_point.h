@@ -27,7 +27,7 @@ unsigned long old_time;//ms
 bool record_data_flag=0;
 bool record_speed_data_flag=0;
 bool before_starting_pos_flag=0;
-float before_starting_pos;
+float before_starting_pos=0;
 int prompt_cont=0;
 float all_PROMPT[200];          //當前左右輪差pos    左-右
 float all_PROMPT_w[200];        //當前車中心位置pos  (左+右)/2
