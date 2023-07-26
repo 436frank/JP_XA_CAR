@@ -41,8 +41,11 @@ float Kp=0.0292, Kd=4.865, basePWM =0 ;     //LINE_PD   1.3m/s  ok
 //float Kp=0.01, Kd=1, basePWM =0 ;     //LINE_PD   0.5m/s ok
 //int Kp=40, Kd=300, basePWM =600 ; //LINE_PD
 bool run_flag=0;
-char run_mod_flag=0;
 
+char run_mod_flag=0;
+char old_run_mod_flag=0;
+char sp_save_flag=0;
+char sp_save_cnt=0;
 
 float deltaPWM=0;
 float angle_velocity=0;
@@ -222,24 +225,30 @@ void Calculate_road() {
         all_road_radius[i] = abs(
                 (all_road_distance_mm[i] / 10) / ((all_PROMPT_w[i] - all_PROMPT_w[i - 1]) * p2r));//估測角度
         if (all_road_radius[i] > 999)all_road_radius[i] = 999;//估測出的線段半徑所上限999
-        /** SP_MOD 1 **/
-        if ((all_road_radius[i] >= 300) && (all_road_distance_mm[i] > 100))//半徑大於300 且現段長度超過10cm 配速1m/s
-        {all_road_speed_max[i] = 2 * mm2p;}
-        else{all_road_speed_max[i] = 1.1 * mm2p;}
+        /** SP_MOD 1 選單3**/
+        if ((all_road_radius[i] >= 270) && (all_road_distance_mm[i] > 100))//半徑大於300 且現段長度超過10cm 配速1m/s
+        {all_road_speed_max[i] = 1.5* mm2p;}
+        else{all_road_speed_max[i] = 1.5* mm2p;}
         /** SP_MOD 2 **/
-        if ((all_road_radius[i] >= 300) && (all_road_distance_mm[i] > 200))//半徑大於300 且現段長度超過10cm 配速1m/s
-        {all_road_speed_max2[i] = 2.3 * mm2p;}
-        else if((all_road_radius[i]>300)&&(all_road_distance_mm[i] > 100) )
-        {all_road_speed_max2[i] = 1.35 * mm2p;}
-        else if((all_road_radius[i]<=300)&&(all_road_radius[i]>200 ))
+        if ((all_road_radius[i] >= 280) )//半徑大於300 且現段長度超過10cm 配速1m/s   //&& (all_road_distance_mm[i] > 300)
+        {all_road_speed_max2[i] = 2.8 * mm2p;}
+        else if((all_road_radius[i]<280)&&(all_road_radius[i]>180))
+        {all_road_speed_max2[i] = 2.1 * mm2p;}
+        else if((all_road_radius[i]<180)&&(all_road_radius[i]>50))
+        {all_road_speed_max2[i] = 1.8* mm2p;}
+        else if(all_road_radius[i]<50)
         {all_road_speed_max2[i] = 1.3 * mm2p;}
-        else if((all_road_radius[i]<=200)&&(all_road_radius[i]>=100 ))
-        {all_road_speed_max2[i] = 1.2 * mm2p;}
+//        else if((all_road_radius[i]>300)&&(all_road_distance_mm[i] > 100) )
+//        {all_road_speed_max2[i] = 1.35 * mm2p;}
+//        else if((all_road_radius[i]<=300)&&(all_road_radius[i]>200 ))
+//        {all_road_speed_max2[i] = 1.3 * mm2p;}
+//        else if((all_road_radius[i]<=200)&&(all_road_radius[i]>=100 ))
+//        {all_road_speed_max2[i] = 1.2 * mm2p;}
         /** SP_MOD 3 **/
         if ((all_road_radius[i] >= 300) && (all_road_distance_mm[i] > 200))//半徑大於300 且現段長度超過10cm 配速1m/s
-        {all_road_speed_max3[i] = 2.7 * mm2p;}
+        {all_road_speed_max3[i] = 3 * mm2p;}  //2.6
         else if((all_road_radius[i]>300)&&(all_road_distance_mm[i] > 100) )
-        {all_road_speed_max3[i] = 1.7 * mm2p;}
+        {all_road_speed_max3[i] = 2.5 * mm2p;}//1.35
         else if((all_road_radius[i]<=300)&&(all_road_radius[i]>200 ))
         {all_road_speed_max3[i] = 1.3 * mm2p;}
         else if((all_road_radius[i]<=200)&&(all_road_radius[i]>=100 ))
@@ -249,8 +258,8 @@ void Calculate_road() {
     all_road_speed_max2[0]=0.8*mm2p;
     all_road_speed_max3[0]=0.8*mm2p;
     all_road_speed_max[prompt_cont+1]=1.1*mm2p;
-    all_road_speed_max2[prompt_cont+1]=1.1*mm2p;
-    all_road_speed_max3[prompt_cont+1]=1.1*mm2p;
+    all_road_speed_max2[prompt_cont+1]=1.3*mm2p;
+    all_road_speed_max3[prompt_cont+1]=1.3*mm2p;
 }
 float Calculate_Acc_dec_distance()
 {

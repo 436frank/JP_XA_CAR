@@ -14,7 +14,7 @@
 #define pos_1cm_range 4.1 //              1cm
 
 
-#define time_out_max 200 // 1ms *300 =300ms
+#define time_out_max 190 // 1ms *300 =300ms
 int time_out=0;
 float old_pos=0;
 bool Protect_flag=0;
@@ -45,8 +45,8 @@ extern bool run_flag;
 extern int distance_flag;
 
 char test_1m_flag=0;
-float test_1_pwm_r[1000];
-float test_1_pwm_l[1000];
+float test_1_pwm_r[10];
+float test_1_pwm_l[10];
 float test_1_v[1000];
 float test_1_cmd[1000];
 
@@ -129,9 +129,10 @@ void check_point()
     }
     if(point_STOP_or_Hint_flag==1) //左右IR沒上鎖就
     {
-        if(IRsensors[6]>2800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
-        if(IRsensors[0]>2500){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
-
+        if(IRsensors[6]>3800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
+        if(IRsensors[0]>3800){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
+//        if(IRsensors[6]>2800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
+//        if(IRsensors[0]>2500){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
         if(old_stop_point_state > stop_point_state)//下緣觸發 右邊 起終點 1變0
         {
             stop_point_cont++;

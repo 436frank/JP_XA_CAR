@@ -58,6 +58,10 @@ void TC3_Handler()
         IR_calibrations();
         check_point();
         Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
+        if(run_mod_flag==old_run_mod_flag)
+        {}
+        else if((run_mod_flag>old_run_mod_flag)||(run_mod_flag<old_run_mod_flag))
+        {sp_save_flag=1;}
         switch (run_mod_flag) {
             case 1:
                 vc_Command(1);
@@ -69,6 +73,7 @@ void TC3_Handler()
                 vc_Command(3);
                 break;
         }
+        old_run_mod_flag=run_mod_flag;
         LINE_following_PC();
         Protect();
     }

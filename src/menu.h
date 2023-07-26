@@ -454,7 +454,7 @@ void StateMachine_to_loop(unsigned char value)
                 mpu6500_set_flag=0;
             }
             record_data_flag=1;
-            if(vc_command<1.1*mm2p) {
+            if(vc_command<1.3*mm2p) {
                 run_mod_flag = 1;
 
             } else{
@@ -475,15 +475,20 @@ void StateMachine_to_loop(unsigned char value)
                 mpu6500AutoOffset(1000, 100);
                 mpu6500_set_flag=0;
                 run_flag = 1;
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, OFF);
             }
             if(run_flag==1)
             {
                 if(sprint_cnt==0){
                     if (vc_command < all_road_speed_max[sprint_cnt]) {
                         run_mod_flag = 1;
+                        digitalWrite(LED_2_PIN, ON);
                     }
                     else if(vc_command >= all_road_speed_max[sprint_cnt]){
                         run_mod_flag = 2;}
+                        digitalWrite(LED_2_PIN, OFF);
 //                    vc_command=all_road_speed_max[sprint_cnt];
                 }
                 if(distance_flag==1)
@@ -492,15 +497,17 @@ void StateMachine_to_loop(unsigned char value)
                     distance_flag=0;
                 }
                 if(old_sprint_cnt!=sprint_cnt){
-                    if((posFeedBack-before_starting_pos)>=(distance-(Calculate_Acc_dec_distance()*1.2))){
+                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1))){  //減速距離1倍       //之前*1.2
                         if (vc_command > all_road_speed_max[sprint_cnt+1])
                         {
                             run_mod_flag = 3;
+                            digitalWrite(LED_1_PIN, ON);
                         }
                         else
                         {
                             run_mod_flag = 2;
                             old_sprint_cnt = sprint_cnt;
+                            digitalWrite(LED_1_PIN, OFF);
                         }
 
                     }
@@ -516,8 +523,6 @@ void StateMachine_to_loop(unsigned char value)
                         }
                     }
                 }
-
-
             }
             if(end_flag==1){
                 run_mod_flag = 3;
@@ -540,9 +545,12 @@ void StateMachine_to_loop(unsigned char value)
                 if(sprint_cnt==0){
                     if (vc_command < all_road_speed_max2[sprint_cnt]) {
                         run_mod_flag = 1;
+                        if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                     }
                     else if(vc_command >= all_road_speed_max2[sprint_cnt]){
-                        run_mod_flag = 2;}
+                        run_mod_flag = 2;
+                        if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+                    }
 //                    vc_command=all_road_speed_max[sprint_cnt];
                 }
                 if(distance_flag==1)
@@ -551,14 +559,16 @@ void StateMachine_to_loop(unsigned char value)
                     distance_flag=0;
                 }
                 if(old_sprint_cnt!=sprint_cnt){
-                    if((posFeedBack-before_starting_pos)>=(distance-(13.4+Calculate_Acc_dec_distance()*1.4))){
+                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1.2  ))){
                         if (vc_command > all_road_speed_max2[sprint_cnt+1])
                         {
                             run_mod_flag = 3;
+                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                         }
                         else
                         {
                             run_mod_flag = 2;
+                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                             old_sprint_cnt = sprint_cnt;
                         }
                     }
@@ -566,11 +576,14 @@ void StateMachine_to_loop(unsigned char value)
                     {
                         if (vc_command == all_road_speed_max2[sprint_cnt]) {
                             run_mod_flag = 2;
+                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                             old_sprint_cnt = sprint_cnt;
                         } else if (vc_command > all_road_speed_max2[sprint_cnt]) {
                             run_mod_flag = 3;
+                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                         } else if (vc_command < all_road_speed_max2[sprint_cnt]) {
                             run_mod_flag = 1;
+                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                         }
                     }
                 }
@@ -607,7 +620,7 @@ void StateMachine_to_loop(unsigned char value)
                     distance_flag=0;
                 }
                 if(old_sprint_cnt!=sprint_cnt){
-                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1.6))){
+                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1    ))){
                         if (vc_command > all_road_speed_max3[sprint_cnt+1])
                         {
                             run_mod_flag = 3;
@@ -640,25 +653,50 @@ void StateMachine_to_loop(unsigned char value)
             break;
         case 6://抓資料
             if(mpu6500_set_flag==1){
-                clearAll_();
-                delay(200);
-                mpu6500AutoOffset(1000, 100);
-                mpu6500_set_flag=0;
-            }
-            record_data_flag=1;
-            if(vc_command<1.3*mm2p) {
-                run_mod_flag = 1;
-
-            } else{
-                run_mod_flag = 2;
-                vc_command = 1.3*mm2p;
-            }
-            LINE_following_PC_flag = 1;
-            if(end_flag==1){
-                delay(200);
+                //Calculate_road();
+//                for (int i = 0; i < prompt_cont; ++i) {
+//                    SerialUSB.print(all_road_distance_mm[i]);
+//                    SerialUSB.print("\t");
+//                    SerialUSB.print(all_road_radius[i]);
+//                    SerialUSB.print("\t");
+//                    SerialUSB.print(all_road_speed_max2[i]);
+//                    SerialUSB.print("\t");
+//                    SerialUSB.print(all_PROMPT[i]);
+//                    SerialUSB.print("\n");
+//                }
+                for (int i = 0; i < sp_save_cnt; ++i) {
+                    SerialUSB.print(test_1_cmd[i]);
+                    SerialUSB.print("\t");
+                    SerialUSB.print(test_1_v[i]);
+                    SerialUSB.print("\n");
+                }
+//                SerialUSB.print("87");
+//                SerialUSB.print("\t");
+//                SerialUSB.print("87");
+//                SerialUSB.print("\n");
                 clearAll();
             }
-            break;
+            ///測T型
+//            if(mpu6500_set_flag==1){
+//                clearAll_();
+//                delay(200);
+//                mpu6500AutoOffset(1000, 100);
+//                mpu6500_set_flag=0;
+//            }
+//            record_data_flag=1;
+//            if(vc_command<1.3*mm2p) {
+//                run_mod_flag = 1;
+//
+//            } else{
+//                run_mod_flag = 2;
+//                vc_command = 1.3*mm2p;
+//            }
+//            LINE_following_PC_flag = 1;
+//            if(end_flag==1){
+//                delay(200);
+//                clearAll();
+//            }
+        break;
     }
 }
 #endif
