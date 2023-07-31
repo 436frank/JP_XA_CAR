@@ -583,7 +583,11 @@ void StateMachine_to_loop(unsigned char value)
                             if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                         } else if (vc_command < all_road_speed_max2[sprint_cnt]) {
                             run_mod_flag = 1;
-                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+                            if(sp_save_flag==1){
+                                test_1_v[sp_save_cnt]=velFeedBack;
+                                test_1_cmd[sp_save_cnt]=vc_command;
+                                sp_save_flag=0;
+                                sp_save_cnt++;}
                         }
                     }
                 }
@@ -674,6 +678,7 @@ void StateMachine_to_loop(unsigned char value)
 //                SerialUSB.print("\t");
 //                SerialUSB.print("87");
 //                SerialUSB.print("\n");
+                read_eeprom();
                 clearAll();
             }
             ///測T型

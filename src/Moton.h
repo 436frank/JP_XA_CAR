@@ -9,6 +9,7 @@
 #include <Arduino.h>
 #include "ck_point.h"
 
+
 #define sample_time             0.0005f              // 控制時間(s)
 #define wheel_diameter          24.85f                // 輪直徑(mm)
 #define wheel_pulses            8                    // (pulses)
@@ -63,19 +64,18 @@ extern volatile float pos_error_old;
 extern volatile float angle_error_old;
 
 
-
 void Motor_control(int speed_L, int speed_R);
 void MotorRest();
 void vc_Command(char mod);
-float vc_following();
 float LINE_following();
-void LINE_following_VC();
+vw PC_WC_PD();
 void LINE_following_PC();
 void Calculate_road();
-int Calculate_Acc_dec_distance(float V1);
-vw PC_WC_PD();
 
-/**()**/
+/**  Calculate Acc dec distance Parameters **/
+float Calculate_Acc_dec_distance();
+int Calculate_Acc_dec_distance(float V1);/**計算減速距離**/
+/**---------------------馬達控制------------------**/
 void Motor_control(int speed_L, int speed_R) {
     // Left motor
     if (speed_L > 0) {
@@ -120,6 +120,24 @@ void MotorRest() {
     REG_TCC0_CC2 = 0;                               // TCC0 CC3 - on D2
     while (TCC0->SYNCBUSY.bit.CC2);                 // Wait for synchronization
 }
+/**------------------速度命令Switch---------------**/
+void vc_Command(char mod) {
+    switch (mod) {
+        case 1:
+            vc_command +=acceleration_p;//(sample_time * acceleration_p);
+            break;
+        case 2:
+
+            break;
+        case 3:
+            vc_command -= acceleration_p;//acceleration_p;//(sample_time * acceleration_p);
+            if (vc_command <= 0)vc_command = 0;
+            break;
+    }
+    Speed_integral+=velFeedBack;
+    Speed_cmd_integral+=vc_command;
+}
+/**------------------PD位置控制-------------------**/
 float LINE_following() {
     float  spd_L, spd_R;
     error_new = center - Lp;
@@ -151,68 +169,7 @@ void LINE_following_PC() {
     Motor_control(spd_L, spd_R);
 
 }
-void vc_Command(char mod) {
-    switch (mod) {
-        case 1:
-            vc_command +=acceleration_p;//(sample_time * acceleration_p);
-            break;
-        case 2:
-
-            break;
-        case 3:
-            vc_command -= acceleration_p;//acceleration_p;//(sample_time * acceleration_p);
-            if (vc_command <= 0)vc_command = 0;
-            break;
-    }
-    Speed_integral+=velFeedBack;
-    Speed_cmd_integral+=vc_command;
-}
-float vc_following() {
-    float deltaPWM, vc;
-    vc_error_new = vc_command - velocity;  //現在速度誤差
-    vc_integral += vc_error_new;
-    float integral_temp = 2680 / vc_ki; //設一個變化量上下限 防止誤差積分飽和的問題
-    if (vc_integral > integral_temp) vc_integral = integral_temp;
-        //限制 累積誤差 超過正的變化量上限 就等於正的變化量上限
-    else if (vc_integral < -integral_temp) vc_integral = -integral_temp;
-       //限制 累積誤差 小於負的變化量下限 就等於負的變化量下限
-    deltaPWM = vc_kp * vc_error_new + vc_kd * (vc_error_new - vc_error_old) + vc_ki * vc_integral;
-    vc_error_old = vc_error_new;
-    if (deltaPWM>3800) deltaPWM = 3800;  //鎖 PWM最大值4000
-    vc = deltaPWM;
-    return vc;
-}
-
-void LINE_following_VC() {
-    float spd_L, spd_R, vc, deltaPWM;
-    vc = vc_following();
-    error_new = center - Lp;
-    deltaPWM = Kp * error_new + Kd * (error_new - error_old);
-    error_old = error_new;
-    spd_L = vc - deltaPWM;
-    spd_R = vc + deltaPWM;
-    Motor_control(spd_L, spd_R);
-
-}
-void LINE_following_not_moving() {
-    int spd_L, spd_R, b_pwm = 0, deltaPWM;
-    error_new = center - Lp;
-    deltaPWM = 40 * error_new + 300 * (error_new - error_old);
-    error_old = error_new;
-    spd_L = b_pwm - deltaPWM;
-    spd_R = b_pwm + deltaPWM;
-    Motor_control(spd_L, spd_R);
-}
-void LINE_following_park_well() {
-    int spd_L, spd_R, b_pwm = 1000, deltaPWM;
-    error_new = center - Lp;
-    deltaPWM = Kp * error_new + Kd * (error_new - error_old);
-    error_old = error_new;
-    if (park_well_cont > 1) b_pwm = 0;
-    spd_L = b_pwm - deltaPWM;
-    spd_R = b_pwm + deltaPWM;
-    Motor_control(spd_L, spd_R);
-}
+/**------------------計算配速&減速距離--------------**/
 void Calculate_road() {
     for(int i = 0; i < 200; i++) {
         all_road_speed_max[i] = 1.1*mm2p;
@@ -260,6 +217,7 @@ void Calculate_road() {
     all_road_speed_max[prompt_cont+1]=1.1*mm2p;
     all_road_speed_max2[prompt_cont+1]=1.3*mm2p;
     all_road_speed_max3[prompt_cont+1]=1.3*mm2p;
+
 }
 float Calculate_Acc_dec_distance()
 {
@@ -267,3 +225,57 @@ float Calculate_Acc_dec_distance()
     result = (float)((vc_command*vc_command)-(all_road_speed_max[sprint_cnt+1]*all_road_speed_max[sprint_cnt+1]))/(2*acceleration_p );
     return result;
 }
+
+
+
+
+
+
+/**------------------PI速度控制-------------------未使用
+float vc_following();
+void LINE_following_VC();
+float vc_following() {
+    float deltaPWM, vc;
+    vc_error_new = vc_command - velocity;  //現在速度誤差
+    vc_integral += vc_error_new;
+    float integral_temp = 2680 / vc_ki; //設一個變化量上下限 防止誤差積分飽和的問題
+    if (vc_integral > integral_temp) vc_integral = integral_temp;
+        //限制 累積誤差 超過正的變化量上限 就等於正的變化量上限
+    else if (vc_integral < -integral_temp) vc_integral = -integral_temp;
+       //限制 累積誤差 小於負的變化量下限 就等於負的變化量下限
+    deltaPWM = vc_kp * vc_error_new + vc_kd * (vc_error_new - vc_error_old) + vc_ki * vc_integral;
+    vc_error_old = vc_error_new;
+    if (deltaPWM>3800) deltaPWM = 3800;  //鎖 PWM最大值4000
+    vc = deltaPWM;
+    return vc;
+}
+void LINE_following_VC() {
+    float spd_L, spd_R, vc, deltaPWM;
+    vc = vc_following();
+    error_new = center - Lp;
+    deltaPWM = Kp * error_new + Kd * (error_new - error_old);
+    error_old = error_new;
+    spd_L = vc - deltaPWM;
+    spd_R = vc + deltaPWM;
+    Motor_control(spd_L, spd_R);
+}
+void LINE_following_not_moving() {
+    int spd_L, spd_R, b_pwm = 0, deltaPWM;
+    error_new = center - Lp;
+    deltaPWM = 40 * error_new + 300 * (error_new - error_old);
+    error_old = error_new;
+    spd_L = b_pwm - deltaPWM;
+    spd_R = b_pwm + deltaPWM;
+    Motor_control(spd_L, spd_R);
+}
+void LINE_following_park_well() {
+    int spd_L, spd_R, b_pwm = 1000, deltaPWM;
+    error_new = center - Lp;
+    deltaPWM = Kp * error_new + Kd * (error_new - error_old);
+    error_old = error_new;
+    if (park_well_cont > 1) b_pwm = 0;
+    spd_L = b_pwm - deltaPWM;
+    spd_R = b_pwm + deltaPWM;
+    Motor_control(spd_L, spd_R);
+}//未使用
+**/

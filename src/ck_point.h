@@ -7,6 +7,7 @@
 #endif //JP_XA_CAR_CK_POINT_H
 
 #include <Arduino.h>
+#include <FlashAsEEPROM_SAMD.h>
 
 #define all_white_val_max 1900
 #define all_black_val_min 1500
@@ -55,12 +56,11 @@ uint8_t vc_flag_=0;
 uint8_t end_flag=0;
 
 int tcont=0;
-
-
+/**  to eeprom  **/
+void read_eeprom();
+/**  to check_point  **/
 void Protect();
 void check_point();
-/**  Calculate Acc dec distance Parameters **/
-float Calculate_Acc_dec_distance();
 /**  to check_point Parameters  **/
 int park_well_cont=0;
 uint8_t point_cross_flag=0 ;        //preset = 0
@@ -77,6 +77,21 @@ uint8_t hint_point_LED_state_cnt=0;
 float pos_judge_cross=0;//十字鎖住的範圍
 float pos_stop=0;//停車跑一段的範圍
 /**  to check_point Parameters_END  **/
+float AAA=0;
+uint16_t AAAA=0;
+int AA=0;
+int16_t A=0;
+void read_eeprom()
+{
+    SerialUSB.print(sizeof(AAA));
+    SerialUSB.print("\n");
+    SerialUSB.print(sizeof(AAAA));
+    SerialUSB.print("\n");
+    SerialUSB.print(sizeof(AA));
+    SerialUSB.print("\n");
+    SerialUSB.print(sizeof(A));
+    SerialUSB.print("\n");
+}
 /**  check_point  **/
 void Protect()
 {
