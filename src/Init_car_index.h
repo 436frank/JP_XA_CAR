@@ -10,6 +10,8 @@
 #include <SPI.h>
 #include "mpu6500.h"
 
+
+
 /** Encoder **/
 #define Encoder_L_A 6
 #define Encoder_L_B 7
@@ -60,6 +62,9 @@ bool LINE_flag=0;
 /** menu  variable **/
 int16_t start_cont=0;
 bool start_flag =0;//
+
+
+
 /** Encoder variable **/
 struct Motion_status {
     float  pOLD;
@@ -261,13 +266,23 @@ void checkButton() {
             if (bReleaseCount > countButton) {
                 buttonPressed = LOW;            // button released confirmed
                 bReleaseCount = 0;              // reset released count value
+//                if(menu_state_now==select_mod)
+//                {
+//                    menu_mod_now=old_select;
+//                }
+//                else if(menu_state_now==select_moves)
+//                {
+//                    menu_moves_now=old_select;
+//                }
+//                else if(menu_state_now==start_up)
+//                {
+//
+//                }
 //                sButton++;                      // change Button status value
-                digitalWrite(LED_L_PIN,OFF);
-                digitalWrite(LED_R_PIN,OFF);
-                sButton=old_select;
-                mpu6500_set_flag=1;
-                start_flag=1;
-                //start_cont=0;
+//                sButton=old_select;
+//                mpu6500_set_flag=1;
+//                start_flag=1;
+
                 tone(Buzzer_PIN,1318,200);
 //                if (sButton == 1) cCount = 0;     // reset
 //                if (sButton > 5) sButton = 0;       // the largest value of Button status is 3

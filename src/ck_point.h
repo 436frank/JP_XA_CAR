@@ -56,8 +56,9 @@ uint8_t vc_flag_=0;
 uint8_t end_flag=0;
 
 int tcont=0;
-/**  to eeprom  **/
-void read_eeprom();
+/**  to flash  **/
+//void read_eeprom();
+void SAVE_Flash_data();
 /**  to check_point  **/
 void Protect();
 void check_point();
@@ -77,20 +78,14 @@ uint8_t hint_point_LED_state_cnt=0;
 float pos_judge_cross=0;//十字鎖住的範圍
 float pos_stop=0;//停車跑一段的範圍
 /**  to check_point Parameters_END  **/
-float AAA=0;
-uint16_t AAAA=0;
-int AA=0;
-int16_t A=0;
-void read_eeprom()
-{
-    SerialUSB.print(sizeof(AAA));
-    SerialUSB.print("\n");
-    SerialUSB.print(sizeof(AAAA));
-    SerialUSB.print("\n");
-    SerialUSB.print(sizeof(AA));
-    SerialUSB.print("\n");
-    SerialUSB.print(sizeof(A));
-    SerialUSB.print("\n");
+float test_cnttt=123123.12;
+float test_cnttout=0;
+void SAVE_Flash_data() {
+    int address = 0;
+    EEPROM.put(address, test_cnttt);
+    if (!EEPROM.getCommitASAP()) {EEPROM.commit();}  // CommitASAP not set. Need commit()
+    EEPROM.get(address , test_cnttout);
+    SerialUSB.print(test_cnttout);
 }
 /**  check_point  **/
 void Protect()

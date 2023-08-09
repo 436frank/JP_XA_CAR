@@ -9,20 +9,18 @@
 #include <Arduino.h>
 //#define old_menu
 #define new_menu
+#define menu_2023
 /**  variable  **/
 extern float Speed_cmd_integral;
 int sprint_cnt=0;
 int distance_flag=0;
 float distance=0;
 int Notice_subtract_distance_flag=0;
-
 int old_sprint_cnt=0;
-
-
-
 /**  old_menu  **/
-void StateMachine(unsigned char value);
+
 #ifdef old_check
+void StateMachine(unsigned char value);
 void StateMachine(unsigned char value) {
     unsigned char index;
     switch (value)
@@ -171,12 +169,13 @@ void StateMachine(unsigned char value) {
 }
 #endif
 /**  new_menu  **/
+#ifdef new_menu
 void clearAll();
 void clearAll_();
 void Selector_QEI();
 void Selector_Observer();
 void StateMachine_to_loop(unsigned char value);
-#ifdef new_menu
+
 
 void clearAll() {
     end_flag=0;
@@ -678,7 +677,7 @@ void StateMachine_to_loop(unsigned char value)
 //                SerialUSB.print("\t");
 //                SerialUSB.print("87");
 //                SerialUSB.print("\n");
-                read_eeprom();
+                SAVE_Flash_data();
                 clearAll();
             }
             ///測T型
@@ -702,6 +701,157 @@ void StateMachine_to_loop(unsigned char value)
 //                clearAll();
 //            }
         break;
+    }
+}
+#endif
+/**  menu_2023  **/
+#ifdef menu_2023
+
+typedef enum menu_state
+    {
+        select_mod=0,
+        select_moves=1,
+        start_up=2,
+    };
+typedef enum mode
+    {
+        mod_1=1,
+        mod_2=2,
+        mod_3=3,
+        mod_4=4,
+        mod_5=5,
+    };
+typedef enum moves_of_mode
+    {
+        moves_1=1,
+        moves_2=2,
+        moves_3=3,
+        moves_4=4,
+        moves_5=5,
+    };
+menu_state _state = {};
+mode _mod={};
+moves_of_mode _moves={};
+unsigned char menu_state_now = 0;
+unsigned char menu_mod_now = 0;
+unsigned char menu_moves_now = 0;
+void Selector_Observer_2023() {
+    if (Pcount_L < 20)//未確認
+    {
+        if (old_enter != 0) {
+            tone(Buzzer_PIN, 800, 200);
+            digitalWrite(LED_L_PIN, OFF);
+            digitalWrite(LED_R_PIN, OFF);
+            old_enter = 0;
+        }                //選擇0
+        if (Pcount_R < 10)
+        {
+            if (old_select != 0)
+            {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 0;
+            }
+        }
+        else if (Pcount_R >= 10 && Pcount_R < 20)//選擇1
+        {
+            if (old_select != 1) {
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, OFF);
+                tone(Buzzer_PIN, 1318, 200);
+                old_select = 1;
+            }
+        }
+        else if (Pcount_R >= 20 && Pcount_R < 30)//選擇2
+        {
+            if (old_select != 2) {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 2;
+            }
+        }
+        else if (Pcount_R >= 40 && Pcount_R < 50)//選擇3
+        {
+            if (old_select != 3) {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 3;
+            }
+        }
+        else if (Pcount_R >= 50 && Pcount_R < 60)//選擇4
+        {
+            if (old_select != 4) {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, OFF);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 4;
+            }
+        }
+        else if (Pcount_R >= 60 && Pcount_R < 70)//選擇5
+        {
+            if (old_select != 5) {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, OFF);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 5;
+            }
+        }
+        else if (Pcount_R >= 70 && Pcount_R < 80)                 //選擇6
+        {
+            if (old_select != 6) {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, OFF);
+                old_select = 6;
+            }
+        }
+        else if (Pcount_R >= 80)                 //選擇7
+        {
+            if (old_select != 7) {
+                tone(Buzzer_PIN, 1318, 200);
+                digitalWrite(LED_1_PIN, ON);
+                digitalWrite(LED_2_PIN, ON);
+                digitalWrite(LED_3_PIN, ON);
+                old_select = 7;
+            }
+        }
+    }
+    else if (Pcount_L >= 20)
+    {
+        if (old_enter != 1) {
+            tone(Buzzer_PIN, 800, 200);
+            digitalWrite(LED_L_PIN, ON);
+            digitalWrite(LED_R_PIN, OFF);
+            clearAll();
+            old_enter = 1;
+        }
+    } //確認
+}
+void StateMachine_2023(unsigned char value)
+{
+    if (menu_state_now == select_mod)
+    {
+        MotorRest();
+        Selector_Observer_2023();
+    }
+    else if (menu_state_now == select_moves)
+    {
+        MotorRest();
+        Selector_Observer_2023();
+    }
+    else if (menu_state_now == start_up)
+    {
+
     }
 }
 #endif

@@ -30,8 +30,10 @@ void loop()
 //        SerialUSB.print(i==6?'\n':'\t');
 //    }
 //    delay(10);
+//    SerialUSB.print(sButton);
+//    delay(100);
     /** MENU **/
-    StateMachine_to_loop(sButton);
+    StateMachine_2023(sButton);
 }
 /** TC3 Interrupt Service Routine **/
 void TC3_Handler()
