@@ -4,14 +4,19 @@
 
 #ifndef JP_XA_CAR_MENU_H
 #define JP_XA_CAR_MENU_H
-#endif //JP_XA_CAR_MENU_H
 
-#include <Arduino.h>
+
+//#include <Arduino.h>
+#include <ck_point.h>
+#include <Moton.h>
+#include <Init_car_index.h>
+
 //#define old_menu
 #define new_menu
 #define menu_2023
 /**  variable  **/
 extern float Speed_cmd_integral;
+
 int sprint_cnt=0;
 int distance_flag=0;
 float distance=0;
@@ -854,4 +859,5 @@ void StateMachine_2023(unsigned char value)
 
     }
 }
-#endif
+#endif//menu_2023
+#endif //JP_XA_CAR_MENU_H

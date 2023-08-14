@@ -4,12 +4,12 @@
 
 #ifndef JP_XA_CAR_MPU6500_H
 #define JP_XA_CAR_MPU6500_H
-
 #endif //JP_XA_CAR_MPU6500_H
-#ifndef MPU6500_H
-#define MPU6500_H
+//#ifndef MPU6500_H
+//#define MPU6500_H
 
 #include <Arduino.h>
+
 //#define GYRO_250DPS
 //#define GYRO_500DPS
 //#define GYRO_1000DPS
@@ -201,4 +201,4 @@ void mpu6500AutoOffset(int cnt, bool wait = true);
 #define MPU6500_ZA_OFFSET_L           0x7E
 
 #define MPU6500_ID                    0x70
-#endif //MPU6500_H
+//#endif //MPU6500_H

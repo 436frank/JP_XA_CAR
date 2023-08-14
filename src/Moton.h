@@ -5,9 +5,10 @@
 #ifndef JP_XA_CAR_MOTON_H
 #define JP_XA_CAR_MOTON_H
 #endif //JP_XA_CAR_MOTON_H
-
-#include <Arduino.h>
-#include "ck_point.h"
+//
+//#include <Arduino.h>
+#include <ck_point.h>
+//#include <Init_car_index.h>
 
 
 #define sample_time             0.0005f              // 控制時間(s)

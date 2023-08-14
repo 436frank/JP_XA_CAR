@@ -4,6 +4,7 @@
 #include "mpu6500.h"
 #include <SPI.h>
 
+
 extern SPIClassSAMD SPI1;
 SPISettings mySPISettings;
 Sensor_TypeDef sen = {};

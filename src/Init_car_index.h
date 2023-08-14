@@ -4,13 +4,14 @@
 
 #ifndef JP_XA_CAR_INIT_CAR_INDEX_H
 #define JP_XA_CAR_INIT_CAR_INDEX_H
-#endif //JP_XA_CAR_INIT_CAR_INDEX_H
 
+//#include <SPI.h>
 
-#include <SPI.h>
-#include "mpu6500.h"
-
-
+//#ifndef MPU6500_H
+#include <mpu6500.h>
+//#endif //MPU6500_H
+#include <menu.h>
+//#include <Moton.h>
 
 /** Encoder **/
 #define Encoder_L_A 6
@@ -63,8 +64,6 @@ bool LINE_flag=0;
 int16_t start_cont=0;
 bool start_flag =0;//
 
-
-
 /** Encoder variable **/
 struct Motion_status {
     float  pOLD;
@@ -105,6 +104,7 @@ uint8_t old_enter=0;
 extern const float mm2p;
 /**    mpu6500 variable   **/
 bool mpu6500_set_flag=0;
+
 /**                    **/
 void READ_QEI();
 void Observer();
@@ -266,18 +266,18 @@ void checkButton() {
             if (bReleaseCount > countButton) {
                 buttonPressed = LOW;            // button released confirmed
                 bReleaseCount = 0;              // reset released count value
-//                if(menu_state_now==select_mod)
-//                {
-//                    menu_mod_now=old_select;
-//                }
-//                else if(menu_state_now==select_moves)
-//                {
-//                    menu_moves_now=old_select;
-//                }
-//                else if(menu_state_now==start_up)
-//                {
-//
-//                }
+                if(menu_state_now==select_mod)
+                {
+                    menu_mod_now=old_select;
+                }
+                else if(menu_state_now==select_moves)
+                {
+                    menu_moves_now=old_select;
+                }
+                else if(menu_state_now==start_up)
+                {
+
+                }
 //                sButton++;                      // change Button status value
 //                sButton=old_select;
 //                mpu6500_set_flag=1;
@@ -423,3 +423,4 @@ void setupPWM() {
                       TCC_CTRLA_ENABLE;             // Enable the TCC0 output
     while (TCC0->SYNCBUSY.bit.ENABLE);              // Wait for synchronization
 }
+#endif //JP_XA_CAR_INIT_CAR_INDEX_

@@ -4,15 +4,19 @@
 
 #ifndef JP_XA_CAR_CK_POINT_H
 #define JP_XA_CAR_CK_POINT_H
-#endif //JP_XA_CAR_CK_POINT_H
 
-#include <Arduino.h>
+
+//#include <Arduino.h>
 #include <FlashAsEEPROM_SAMD.h>
+//#include <Init_car_index.h>
+
 
 #define all_white_val_max 1900
 #define all_black_val_min 1500
 #define not_judge_of_pos_range 28 //      20pos=5cm
 #define pos_1cm_range 4.1 //              1cm
+#define R_IR_ADC_trigger_level 3800//2800
+#define L_IR_ADC_trigger_level 3800//2600
 
 
 #define time_out_max 190 // 1ms *300 =300ms
@@ -139,10 +143,8 @@ void check_point()
     }
     if(point_STOP_or_Hint_flag==1) //左右IR沒上鎖就
     {
-        if(IRsensors[6]>3800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
-        if(IRsensors[0]>3800){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
-//        if(IRsensors[6]>2800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
-//        if(IRsensors[0]>2500){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
+        if(IRsensors[6]>R_IR_ADC_trigger_level){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
+        if(IRsensors[0]>L_IR_ADC_trigger_level){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
         if(old_stop_point_state > stop_point_state)//下緣觸發 右邊 起終點 1變0
         {
             stop_point_cont++;
@@ -245,3 +247,4 @@ void check_point()
     }
 }
 /* check_point_END*/
+#endif //JP_XA_CAR_CK_POINT_H
