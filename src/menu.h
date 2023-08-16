@@ -14,7 +14,7 @@ extern float Speed_cmd_integral;
 int sprint_cnt=0;
 int distance_flag=0;
 float distance=0;
-int Notice_subtract_distance_flag=0;
+
 
 int old_sprint_cnt=0;
 
@@ -173,7 +173,6 @@ void StateMachine(unsigned char value) {
 /**  new_menu  **/
 void clearAll();
 void clearAll_();
-void Selector_QEI();
 void Selector_Observer();
 void StateMachine_to_loop(unsigned char value);
 #ifdef new_menu
@@ -182,7 +181,6 @@ void clearAll() {
     end_flag=0;
     distance_flag=0;
     distance=0;
-    Notice_subtract_distance_flag=0;
     run_flag = 0;
     vc_command=0;
     sprint_cnt=0;
@@ -206,7 +204,6 @@ void clearAll() {
     pos_error=0;
     deltaPWM=0;
     angle_velocity=0;
-    vc_integral = 0;
     angle_error=0;
     posFeedBack=0;
     angleFeedBack=0;
@@ -227,7 +224,6 @@ void clearAll_() {
     end_flag=0;
     distance_flag=0;
     distance=0;
-    Notice_subtract_distance_flag=0;
     run_mod_flag=0;
     before_starting_pos=0;
     before_starting_pos_flag=0;
@@ -245,7 +241,6 @@ void clearAll_() {
     pos_error=0;
     deltaPWM=0;
     angle_velocity=0;
-    vc_integral = 0;
     angle_error=0;
     posFeedBack=0;
     angleFeedBack=0;
@@ -256,88 +251,7 @@ void clearAll_() {
     count_L = 0;
     count_R = 0;
 }
-void Selector_QEI() {
-    if (eMotionL.pNEW < 20) {
-        if (old_enter != 0) {
-            tone(Buzzer_PIN, 800, 200);
-            digitalWrite(LED_L_PIN, OFF);
-            digitalWrite(LED_R_PIN, OFF);
-            old_enter = 0;
-        }
-        if (eMotionR.pNEW < 10) {
-            if (old_select != 0) {
-                tone(Buzzer_PIN, 1318, 200);
-                digitalWrite(LED_1_PIN, OFF);
-                digitalWrite(LED_2_PIN, OFF);
-                digitalWrite(LED_3_PIN, OFF);
-                old_select = 0;
-            }
-        } else if (eMotionR.pNEW >= 10 && eMotionR.pNEW < 20)//選擇1
-        {
-            if (old_select != 1) {
-                digitalWrite(LED_1_PIN, ON);
-                digitalWrite(LED_2_PIN, OFF);
-                digitalWrite(LED_3_PIN, OFF);
-                tone(Buzzer_PIN, 1318, 200);
-                old_select = 1;
-            }
 
-
-        } else if (eMotionR.pNEW >= 20 && eMotionR.pNEW < 30)//選擇2
-        {
-            if (old_select != 2) {
-                tone(Buzzer_PIN, 1318, 200);
-                digitalWrite(LED_1_PIN, OFF);
-                digitalWrite(LED_2_PIN, ON);
-                digitalWrite(LED_3_PIN, OFF);
-                old_select = 2;
-            }
-        } else if (eMotionR.pNEW >= 40 && eMotionR.pNEW < 50)//選擇3
-        {
-            if (old_select != 3) {
-                tone(Buzzer_PIN, 1318, 200);
-                digitalWrite(LED_1_PIN, OFF);
-                digitalWrite(LED_2_PIN, OFF);
-                digitalWrite(LED_3_PIN, ON);
-                old_select = 3;
-            }
-        } else if (eMotionR.pNEW >= 50 && eMotionR.pNEW < 60)//選擇4
-        {
-            if (old_select != 4) {
-                tone(Buzzer_PIN, 1318, 200);
-                digitalWrite(LED_1_PIN, OFF);
-                digitalWrite(LED_2_PIN, ON);
-                digitalWrite(LED_3_PIN, ON);
-                old_select = 4;
-            }
-        } else if (eMotionR.pNEW >= 60 && eMotionR.pNEW < 70)//選擇5
-        {
-            if (old_select != 5) {
-                tone(Buzzer_PIN, 1318, 200);
-                digitalWrite(LED_1_PIN, ON);
-                digitalWrite(LED_2_PIN, OFF);
-                digitalWrite(LED_3_PIN, ON);
-                old_select = 5;
-            }
-        } else if (eMotionR.pNEW >= 70)                     //選擇6
-        {
-            if (old_select != 6) {
-                tone(Buzzer_PIN, 1318, 200);
-                digitalWrite(LED_1_PIN, ON);
-                digitalWrite(LED_2_PIN, ON);
-                digitalWrite(LED_3_PIN, OFF);
-                old_select = 6;
-            }
-        }
-    } else if (eMotionL.pNEW >= 20) {
-        if (old_enter != 1) {
-            tone(Buzzer_PIN, 800, 200);
-            digitalWrite(LED_L_PIN, ON);
-            digitalWrite(LED_R_PIN, OFF);
-            old_enter = 1;
-        }
-    }
-}
 void Selector_Observer() {
     if (Pcount_L < 20)//未確認
     {
@@ -454,16 +368,19 @@ void StateMachine_to_loop(unsigned char value)
                 mpu6500_set_flag=0;
             }
             record_data_flag=1;
-            if(vc_command<1.3*mm2p) {
+            if(vc_command<1.28*mm2p) {
                 run_mod_flag = 1;
 
             } else{
                 run_mod_flag = 2;
-                vc_command = 1.1*mm2p;
+                vc_command = 1.28*mm2p;
             }
-            LINE_following_PC_flag = 1;
+//            LINE_following_PC_flag = 1;
+            run_flag = 1;
             if(end_flag==1){
+            run_mod_flag = 3;
             delay(200);
+            run_flag=0;
             clearAll();
             }
             break;
@@ -475,20 +392,20 @@ void StateMachine_to_loop(unsigned char value)
                 mpu6500AutoOffset(1000, 100);
                 mpu6500_set_flag=0;
                 run_flag = 1;
-                digitalWrite(LED_1_PIN, OFF);
-                digitalWrite(LED_2_PIN, OFF);
-                digitalWrite(LED_3_PIN, OFF);
+//                digitalWrite(LED_1_PIN, OFF);
+//                digitalWrite(LED_2_PIN, OFF);
+//                digitalWrite(LED_3_PIN, OFF);
             }
             if(run_flag==1)
             {
                 if(sprint_cnt==0){
                     if (vc_command < all_road_speed_max[sprint_cnt]) {
                         run_mod_flag = 1;
-                        digitalWrite(LED_2_PIN, ON);
+//                        digitalWrite(LED_2_PIN, ON);
                     }
                     else if(vc_command >= all_road_speed_max[sprint_cnt]){
                         run_mod_flag = 2;}
-                        digitalWrite(LED_2_PIN, OFF);
+//                        digitalWrite(LED_2_PIN, OFF);
 //                    vc_command=all_road_speed_max[sprint_cnt];
                 }
                 if(distance_flag==1)
@@ -501,13 +418,13 @@ void StateMachine_to_loop(unsigned char value)
                         if (vc_command > all_road_speed_max[sprint_cnt+1])
                         {
                             run_mod_flag = 3;
-                            digitalWrite(LED_1_PIN, ON);
+//                            digitalWrite(LED_1_PIN, ON);
                         }
                         else
                         {
                             run_mod_flag = 2;
                             old_sprint_cnt = sprint_cnt;
-                            digitalWrite(LED_1_PIN, OFF);
+//                            digitalWrite(LED_1_PIN, OFF);
                         }
 
                     }
@@ -545,11 +462,11 @@ void StateMachine_to_loop(unsigned char value)
                 if(sprint_cnt==0){
                     if (vc_command < all_road_speed_max2[sprint_cnt]) {
                         run_mod_flag = 1;
-                        if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+//                        if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                     }
                     else if(vc_command >= all_road_speed_max2[sprint_cnt]){
                         run_mod_flag = 2;
-                        if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+//                        if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                     }
 //                    vc_command=all_road_speed_max[sprint_cnt];
                 }
@@ -559,16 +476,16 @@ void StateMachine_to_loop(unsigned char value)
                     distance_flag=0;
                 }
                 if(old_sprint_cnt!=sprint_cnt){
-                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1.2  ))){
+                    if((posFeedBack-before_starting_pos)>=(distance-(16.4+Calculate_Acc_dec_distance()*1.8  ))){
                         if (vc_command > all_road_speed_max2[sprint_cnt+1])
                         {
                             run_mod_flag = 3;
-                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+//                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                         }
                         else
                         {
                             run_mod_flag = 2;
-                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+//                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                             old_sprint_cnt = sprint_cnt;
                         }
                     }
@@ -576,14 +493,14 @@ void StateMachine_to_loop(unsigned char value)
                     {
                         if (vc_command == all_road_speed_max2[sprint_cnt]) {
                             run_mod_flag = 2;
-                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+//                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                             old_sprint_cnt = sprint_cnt;
                         } else if (vc_command > all_road_speed_max2[sprint_cnt]) {
                             run_mod_flag = 3;
-                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+//                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                         } else if (vc_command < all_road_speed_max2[sprint_cnt]) {
                             run_mod_flag = 1;
-                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
+//                            if(sp_save_flag==1){test_1_v[sp_save_cnt]=velFeedBack;test_1_cmd[sp_save_cnt]=vc_command;sp_save_flag=0;sp_save_cnt++;}
                         }
                     }
                 }
@@ -653,27 +570,30 @@ void StateMachine_to_loop(unsigned char value)
             break;
         case 6://抓資料
             if(mpu6500_set_flag==1){
-                //Calculate_road();
-//                for (int i = 0; i < prompt_cont; ++i) {
-//                    SerialUSB.print(all_road_distance_mm[i]);
-//                    SerialUSB.print("\t");
-//                    SerialUSB.print(all_road_radius[i]);
-//                    SerialUSB.print("\t");
-//                    SerialUSB.print(all_road_speed_max2[i]);
-//                    SerialUSB.print("\t");
-//                    SerialUSB.print(all_PROMPT[i]);
-//                    SerialUSB.print("\n");
-//                }
-                for (int i = 0; i < sp_save_cnt; ++i) {
-                    SerialUSB.print(test_1_cmd[i]);
+                Calculate_road();
+                for (int i = 0; i < prompt_cont; ++i) {
+                    SerialUSB.print(all_road_distance_mm[i]);
                     SerialUSB.print("\t");
-                    SerialUSB.print(test_1_v[i]);
+                    SerialUSB.print(all_road_radius[i]);
+                    SerialUSB.print("\t");
+                    SerialUSB.print(all_road_speed_max2[i]);
+                    SerialUSB.print("\t");
+                    SerialUSB.print(all_PROMPT[i]);
                     SerialUSB.print("\n");
                 }
+//                for (int i = 0; i < sp_save_cnt; ++i) {
+//                    SerialUSB.print(test_1_cmd[i]);
+//                    SerialUSB.print("\t");
+//                    SerialUSB.print(test_1_v[i]);
+//                    SerialUSB.print("\n");
+//                }
 //                SerialUSB.print("87");
 //                SerialUSB.print("\t");
-//                SerialUSB.print("87");
-//                SerialUSB.print("\n");
+                SerialUSB.print(prompt_cont);
+
+                SerialUSB.print("\t");
+                SerialUSB.print(stop_point_cont);
+                SerialUSB.print("\n");
                 clearAll();
             }
             ///測T型

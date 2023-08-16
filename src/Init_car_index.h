@@ -90,8 +90,6 @@ float velocity = 0;
 boolean button, buttonPressed;
 unsigned char sButton = 0;  // status of Button
 unsigned int bPressCount = 0, bReleaseCount=0;
-/** LINE_following flag**/
-bool LINE_following_VC_flag=0;
 bool LINE_following_PC_flag = 0;
 /**  selector variable **/
 uint8_t old_select=0;

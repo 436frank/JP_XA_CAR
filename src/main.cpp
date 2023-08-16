@@ -35,21 +35,10 @@ void loop()
 /** TC3 Interrupt Service Routine **/
 void TC3_Handler()
 {
-//    check_point();
     checkButton();
     READ_QEI();
     read_MPU6500_Acc_Gyro();
     Observer();
-    if (test_1m_flag == 1) {
-        test_1_v[test_1m_cont] = vc_command;
-        test_1_cmd[test_1m_cont] = velFeedBack;
-        test_1_pwm_r[test_1m_cont] = Speed_cmd_integral;
-        test_1_pwm_l[test_1m_cont] = posFeedBack;
-        test_1m_cont++;
-    }
-    if (start_flag == 1) {
-        if (start_cont < 5000) start_cont++;
-    }
     if (readAllIR_flag == 1) {
         readAllIR_values();
     }
@@ -58,10 +47,6 @@ void TC3_Handler()
         IR_calibrations();
         check_point();
         Lp = LINE_estimation(IR_caliValues);// calculate weighted average 計算權重平均
-        if(run_mod_flag==old_run_mod_flag)
-        {}
-        else if((run_mod_flag>old_run_mod_flag)||(run_mod_flag<old_run_mod_flag))
-        {sp_save_flag=1;}
         switch (run_mod_flag) {
             case 1:
                 vc_Command(1);
@@ -73,7 +58,7 @@ void TC3_Handler()
                 vc_Command(3);
                 break;
         }
-        old_run_mod_flag=run_mod_flag;
+
         LINE_following_PC();
         Protect();
     }

@@ -10,11 +10,11 @@
 
 #define all_white_val_max 1900
 #define all_black_val_min 1500
-#define not_judge_of_pos_range 28 //      20pos=5cm
+#define not_judge_of_pos_range 33 //      20pos=5cm
 #define pos_1cm_range 4.1 //              1cm
 
 
-#define time_out_max 190 // 1ms *300 =300ms
+#define time_out_max 150 // 1ms *300 =300ms保護時間
 int time_out=0;
 float old_pos=0;
 bool Protect_flag=0;
@@ -38,19 +38,11 @@ float all_road_radius[200];     //半徑
 float all_road_speed_max[200];     //線段最高的目標速度 /mod 3
 float all_road_speed_max2[200];     //線段最高的目標速度 /mod 6
 float all_road_speed_max3[200];     //線段最高的目標速度 /mod
-float all_road_add_subtract_distance[200];   //線段加減距離
-float all_road_Isokinetic_distance[200];     //線段等速距離
+
 extern int sprint_cnt;
 extern bool run_flag;
 extern int distance_flag;
 
-char test_1m_flag=0;
-float test_1_pwm_r[10];
-float test_1_pwm_l[10];
-float test_1_v[1000];
-float test_1_cmd[1000];
-
-int test_1m_cont=0;
 uint8_t vc_flag_=0;
 uint8_t end_flag=0;
 
@@ -129,7 +121,7 @@ void check_point()
     }
     if(point_STOP_or_Hint_flag==1) //左右IR沒上鎖就
     {
-        if(IRsensors[6]>3800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
+        if(IRsensors[6]>3100){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
         if(IRsensors[0]>3800){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
 //        if(IRsensors[6]>2800){stop_point_state=1;}else{stop_point_state=0;}//右邊當下狀態變化 0
 //        if(IRsensors[0]>2500){hint_point_state=1;}else{hint_point_state=0;}//左邊當下狀態變化 6
